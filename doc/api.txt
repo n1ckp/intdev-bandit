@@ -1,0 +1,21 @@
+From board:
+CSV String. 9 floats from accelerometers, gyro, and magnometer,
+	plus 0-255 values for each pressure sensor or LDR
+
+From "driver":
+Some signal smoothing
+Python dictionary
+
+"Raw" API:
+How have the two points translations and orientations changed?
+AND/OR
+Where are the points and how are they orientated?
+
+Gesture API:
+Toe Up/Down (amount)
+Heel Up/Down (amount)
+Foot up/down
+Foot forwards/down
+On ground?
+Toe bent?
+Walking
