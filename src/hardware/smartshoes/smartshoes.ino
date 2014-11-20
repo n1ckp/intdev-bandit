@@ -2,14 +2,21 @@
 #include <L3G.h>
 #include <LSM303.h>
 #include <RFduinoBLE.h>
+#include <stdint.h>
 
 #define BLELED 4
-#define DEBUG true
+#define DEBUG false
 
 L3G gyro;
 LSM303 accelComp;
 
 int deviceConnected = false;
+
+char packet[18] = {
+  0x1, 0x2, 0x3, 0x4, 0x5, 0x6,
+  0x7, 0x8, 0x9, 0xA, 0xB, 0xC,
+  0xD, 0xE, 0xF, 0x1, 0x2, 0x3
+};
 
 void i2c_init() {
   Wire.begin();
@@ -44,28 +51,35 @@ void setup() {
 
   gyro_init();
   accelComp_init();
-  
+
   pinMode(BLELED, OUTPUT);
-  
+
   //RFduinoBLE_advdata = advdata;
   //RFduinoBLE_advdata_len = sizeof(advdata);
   RFduinoBLE.deviceName = "SmartShoes";
   RFduinoBLE.begin();
 }
 
-char* gyro_read() {
+void gyro_read() {
   gyro.read();
   
-  char *x = (char *) &(gyro.g.x);
-  char *y = (char *) &(gyro.g.y);
-  char *z = (char *) &(gyro.g.z);
+  int gix = (int) gyro.g.x;
+  int giy = (int) gyro.g.y;
+  int giz = (int) gyro.g.z;
+ 
+  char *x = (char *) &(gix);
+  char *y = (char *) &(giy);
+  char *z = (char *) &(giz);
 
-  char data[12] = {
-    x[0], x[1], x[2], x[3],
-    y[0], y[1], y[2], y[3],
-    z[0], z[1], z[2], z[3]
-  };
-  
+  packet[0] = x[0];
+  packet[1] = x[1];
+
+  packet[2] = y[0];
+  packet[3] = y[1];
+
+  packet[4] = z[0];
+  packet[5] = z[1];
+
   if (DEBUG) {
     Serial.print(" G ");
     Serial.print("X: ");
@@ -75,21 +89,23 @@ char* gyro_read() {
     Serial.print(" Z: ");
     Serial.print((int)gyro.g.z);
   }
-
-  return data;
 }
 
-char* accel_read() {
+void accel_read() {
   accelComp.readAcc();
   
-  char data[6] = {
-    char(accelComp.a.x && 0xF),
-    char(accelComp.a.x >> 8),
-    char(accelComp.a.y && 0xF),
-    char(accelComp.a.y >> 8),
-    char(accelComp.a.z && 0xF),
-    char(accelComp.a.z >> 8)
-  };
+  char *x = (char *) &(accelComp.a.x);
+  char *y = (char *) &(accelComp.a.y);
+  char *z = (char *) &(accelComp.a.z);
+  
+  packet[6] = x[0];
+  packet[7] = x[1];
+  
+  packet[8] = y[0];
+  packet[9] = y[1];
+  
+  packet[10] = z[0];
+  packet[11] = z[1];
 
   if (DEBUG) {
     Serial.print(" A ");
@@ -100,22 +116,24 @@ char* accel_read() {
     Serial.print(" Z: ");
     Serial.print(accelComp.a.z);
   }
-  
-  return data;
 }
 
-char* compass_read() {
+void compass_read() {
   accelComp.readMag();
   
-  char data[6] = {
-    char(accelComp.m.x && 0xF),
-    char(accelComp.m.x >> 8),
-    char(accelComp.m.y && 0xF),
-    char(accelComp.m.y >> 8),
-    char(accelComp.m.z && 0xF),
-    char(accelComp.m.z >> 8)
-  };
+  char *x = (char *) &(accelComp.m.x);
+  char *y = (char *) &(accelComp.m.y);
+  char *z = (char *) &(accelComp.m.z);
+
+  packet[12] = x[0];
+  packet[13] = x[1];
   
+  packet[14] = y[0];
+  packet[15] = y[1];
+  
+  packet[16] = z[0];
+  packet[17] = z[1];
+
   if (DEBUG) {
     Serial.print(" M ");
     Serial.print("X: ");
@@ -125,34 +143,22 @@ char* compass_read() {
     Serial.print(" Z: ");
     Serial.print(accelComp.m.z);
   }
-  
-  return data;
 }
 
 void loop() {
   if (deviceConnected) {
-    char *gdata = gyro_read();
-    char *adata = accel_read();
-    char *mdata = compass_read();         
-    
-    char packet[24] = {
-      gdata[0], gdata[1], gdata[2], gdata[3], gdata[4], gdata[5],
-      gdata[6], gdata[7], gdata[8], gdata[9], gdata[10], gdata[11],
-      adata[0], adata[1], adata[2], adata[3], adata[4], adata[5],
-      mdata[0], mdata[1], mdata[2], mdata[3], mdata[4], mdata[5]
-    };
-     
-    while(!RFduinoBLE.send(packet, 24)) {
-      Serial.print(".");
-    }
+    gyro_read();
+    accel_read();
+    compass_read();
+
+    RFduinoBLE.send(packet, sizeof(packet));
 
     if (DEBUG) {
       Serial.println("");
-      Serial.println(packet);
     }
   }
 
-  delay(100);
+  //delay(100);
 }
 
 void RFduinoBLE_onConnect() {

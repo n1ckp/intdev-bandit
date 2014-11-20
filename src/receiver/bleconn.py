@@ -1,13 +1,10 @@
 import sys, subprocess, string
 
 class BleConn():
-    def __init__(self, sourceMac, destMac):
-        if type(sourceMac) != str or type(destMac) != str:
-            print "MAC address needs to be a string"
-            sys.exit()
-
+    def __init__(self, sourceMac, destMac, interface):
         self.sourceMac = sourceMac
         self.destMac = destMac
+        self.interface = interface
 
     # read a RAW characteristic from a given UUID
     def readRawUUID(self, uuid):
@@ -15,7 +12,7 @@ class BleConn():
             print "UUID needs to be an integer"
             sys.exit()
 
-        proc = subprocess.Popen(["gatttool", "-t", self.sourceMac, "-b", self.destMac, "--char-read", "--uuid=" + str(uuid)], stdout = subprocess.PIPE)
+        proc = subprocess.Popen(["gatttool", "-i", self.interface, "-t", self.sourceMac, "-b", self.destMac, "--char-read", "--uuid=" + str(uuid)], stdout = subprocess.PIPE)
 
         return proc.communicate()[0]
 
@@ -25,7 +22,7 @@ class BleConn():
             print "handle needs to be a string representation of hex address"
             sys.exit()
 
-        proc = subprocess.Popen(["gatttool", "-t", self.sourceMac, "-b", self.destMac, "--char-read", "--handle=" + handle], stdout = subprocess.PIPE)
+        proc = subprocess.Popen(["gatttool", "-i", self.interface, "-t", self.sourceMac, "-b", self.destMac, "--char-read", "--handle=" + handle], stdout = subprocess.PIPE)
 
         return proc.communicate()[0]
 
