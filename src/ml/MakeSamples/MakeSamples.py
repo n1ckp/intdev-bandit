@@ -8,6 +8,7 @@ import numpy
 def SamplesFromDir(directory, sep='_'):
 	data = []
 	classes =[]
+	seq_lengths = []
 	files = glob.glob(os.path.join(directory, '*.csv'))
 	#process each file in directory
 	for file_name in files:
@@ -15,14 +16,17 @@ def SamplesFromDir(directory, sep='_'):
 		#extract class name from file name
 		class_name = path_leaf(file_name).split(sep, 1)[0]
 		sample_file = open(file_name, 'r')
+		seq_length = 0
 		for line in sample_file:
 			#clean up line
 			line = re.sub('\s+','', line)
 			sample = line.split(',')
 			data.append(sample)
 			classes.append(class_name)
+			seq_length = seq_length + 1
+		seq_lengths.append(seq_length)
 
-	return numpy.array(data).astype(float), numpy.array(classes)
+	return numpy.array(data).astype(float), numpy.array(classes), numpy.array(seq_lengths)
 
 #get the file name from a path
 def path_leaf(path):

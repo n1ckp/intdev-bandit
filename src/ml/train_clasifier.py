@@ -24,7 +24,7 @@ def trainPassiveAgressive(data, classes, dump_file):
 
 def main(args):
 	cv_folds = 10
-	data, classes = SamplesFromDir(args.input_dir)
+	data, classes, seq_lengths = SamplesFromDir(args.input_dir)
 	if args.dump_file != '':
 		if args.classifier == 'pa':
 			trainPassiveAgressive(data, classes, args.dump_file)
