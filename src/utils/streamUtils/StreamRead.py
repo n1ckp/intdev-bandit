@@ -21,5 +21,5 @@ class StreamRead():
 
 	#Empty the buffer can be called before reading to discard
 	#out of date data
-	def emptyStreamBuffer():
+	def emptyStreamBuffer(self):
 		self.stream.seek(0,2)
