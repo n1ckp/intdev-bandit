@@ -14,6 +14,7 @@ stream = StreamRead(inputArgs.streamFile)
 
 #continually poll stream
 while True:
-	records = stream.readFromStream()
-	if records:
-		print records
+    records = stream.readFromStream()
+    if records:
+        for recordList in records:
+            print map((lambda x: "%05d" % int(x)), recordList)
