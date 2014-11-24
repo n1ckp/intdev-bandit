@@ -8,7 +8,7 @@ from utils.streamUtils.StreamRead import StreamRead
 class main():
 	def __init__(self, inputArgs):
 		pygame.init()
-	 	size = width, height = 800, 800
+	 	size = width, height = 1500, 800
 	 	speed = [2, 2]
 	 	black = 0, 0, 0
 	 	self.screen = pygame.display.set_mode(size)
@@ -29,7 +29,7 @@ class main():
 		 						"LEFT-FOOT-STOMP" : self.captureLEFT_FOOT_STOMP,
 								"LEFT-TOE-UP" : self.captureLEFT_TOE_UP,
 								"LEFT-TOE-TAP" : self.captureLEFT_TOE_TAP,
-								"LEFT-HEEL-TAP" : self.catureLEFT_HEEL_TAP,
+								"LEFT-HEEL-TAP" : self.captureLEFT_HEEL_TAP,
 								"LEFT-HEEL-RAISE" : self.captureLEFT_HEEL_RAISE,
 								"LEFT-FOOT-FLICKLEFT" : self.captureLEFT_FOOT_FLICKLEFT,
 								"LEFT-FOOT-FLICKRIGHT" : self.captureLEFT_FOOT_FLICKRIGHT,
