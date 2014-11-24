@@ -52,11 +52,15 @@ class SubplotAnimation(animation.TimedAnimation):
             self.ydatas[i].append(values[i])
             self.lines[i].set_data(self.xdata, self.ydatas[i])
 
+        for i in xrange(0, 9, 3):
             ymin, ymax = self.axes[i].get_ylim()
 
-            if values[i] >= ymax or values[i] <= ymin:
-                self.axes[i].set_ylim(min(self.ydatas[i]), max(self.ydatas[i]))
-                self.axes[i].figure.canvas.draw()
+            if max(values[i:i+3]) >= ymax or min(values[i:i+3]) <= ymin:
+                minimum = min(min(self.ydatas[i:i+3]))
+                maximum = max(max(self.ydatas[i:i+3]))
+                for j in xrange(i, i+3):
+                    self.axes[j].set_ylim(minimum, maximum)
+                    self.axes[j].figure.canvas.draw()
 
         self._drawn_artists = self.lines
 
