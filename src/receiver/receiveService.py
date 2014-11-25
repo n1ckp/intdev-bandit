@@ -4,6 +4,7 @@ sys.path.append(os.path.abspath("../"))
 
 from utils.streamUtils.StreamWrite import StreamWrite
 from bleconn import BleConn
+from calibration import Calibration
 
 parser = argparse.ArgumentParser(description = "Recive Data from smartshoes and write to a stream")
 parser.add_argument("MAC", action = "store", type = str, help = "BLE device MAC address e.g. AB:CD:EF:12:34:56")
