@@ -1,6 +1,7 @@
 import argparse, sys, struct, binascii
 
 from bleconn import BleConn
+from calibration import Calibration
 
 parser = argparse.ArgumentParser(description = "GATTTOOL wrapper for Bluetooth Low Energy Characteristic Reading from RFduino")
 parser.add_argument("MAC", action = "store", type = str, help = "BLE device MAC address e.g. AB:CD:EF:12:34:56")
@@ -9,6 +10,7 @@ parser.add_argument("-S", action = "store", default = "random", type = str, dest
 parser.add_argument("-U", action = "store", default = None, type = int, dest = "uuid", help = "Characteristic UUID to read from (RFduino: 2221)")
 parser.add_argument("-H", action = "store", default = None, type = int, dest = "handle", help = "Characteristic Handle to read from (RFduino: 0x000e)")
 parser.add_argument("-C", action = "store_true", default = False, dest = "continuous", help = "Continuous read mode")
+parser.add_argument("-R", action = "store_true", default = False, dest = "raw", help = "Raw (Uncalibrated) Sensor data output")
 parser.add_argument("-i", action = "store", default = "hci0", type = str, dest = "interface", help = "BLE interface (default: hci0)")
 inputArgs = parser.parse_args()
 
@@ -31,6 +33,7 @@ def unpackFloat(hex):
 def unpackInt(hex):
     return struct.unpack("h", binascii.unhexlify(hex))[0]
 
+c = Calibration()
 
 value = getValue()
 if inputArgs.debug:
@@ -49,6 +52,9 @@ while inputArgs.continuous:
     mx = unpackInt(hexStr[24:28])
     my = unpackInt(hexStr[28:32])
     mz = unpackInt(hexStr[32:36])
+
+    if not inputArgs.raw:
+        gx, gy, gz, ax, ay, az, mx, my, mz = c.process(gx, gy, gz, ax, ay, az, mx, my, mz)
 
     if inputArgs.debug:
         #print value

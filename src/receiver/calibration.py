@@ -26,54 +26,20 @@ class Calibration():
         self.mMaxY = 295
         self.mMaxZ = 472
 
-        self.kpRollPitch = 0.02
-        self.kiRollPitch = 0.00002
-        self.kpYaw = 1.2
-        self.kiYaw = 0.00002
-
-        self.dirCosine = [[1, 0, 0], [0, 1, 0], [0, 0, 1]]
-        self.updateVals = [[0, 0, 0], [0, 0, 0], [0, 0, 0]]
-        self.tempVals = [[0, 0, 0], [0, 0, 0], [0, 0, 0]]
-
-        self.gyroVec = [0] * 3
-        self.accelVec = [0] * 3
-
-        self.pitch = 0
-        self.roll = 0
-        self.yaw = 0
-
-        # integration timer
-        self.DT = 0.02
-
     def process(self, gx, gy, gz, ax, ay, az, mx, my, mz):
-        self.valsUpdate(gx, gy, gz, ax, ay, az)
+        return tuple(self.scaleGyro(gx, gy, gz) + self.scaleAccel(ax, ay, az) + self.scaleMag(mx, my, mz))
 
-        return self.calcEulerAngles()
+    def scaleGyro(self, gx, gy, gz):
+        return [self.gSign[0]*gx*math.radians(self.gGainX),
+                self.gSign[1]*gy*math.radians(self.gGainY),
+                self.gSign[2]*gz*math.radians(self.gGainZ)]
 
-    def valsUpdate(self, gx, gy, gz, ax, ay, az):
-        self.gyroVec = self.scaleGyro({"x" : gx, "y" : gy, "z" : gz})
-        self.accelVec = self.scaleAccel({"x" : ax, "y" : ay, "z" : az})
+    def scaleAccel(self, ax, ay, az):
+        return [self.aSign[0]*(ax >> 4),
+                self.aSign[1]*(ay >> 4),
+                self.aSign[2]*(az >> 4)]
 
-        self.updateVals[0][1] = -self.DT * self.gyroVec[2]
-        self.updateVals[0][2] = self.DT * self.gyroVec[1]
-        self.updateVals[1][0] = self.DT * self.gyroVec[2]
-
-        self.updateVals[1][2] = -self.DT * self.gyroVec[0]
-        self.updateVals[2][0] = -self.DT * self.gyroVec[1]
-        self.updateVals[2][1] = self.DT * self.gyroVec[0]
-
-    def scaleAccel(self, data):
-        return [self.aSign[0]*(data["x"] >> 4),
-                self.aSign[1]*(data["y"] >> 4),
-                self.aSign[2]*(data["z"] >> 4)]
-
-    def scaleGyro(self, data):
-        return [self.gSign[0]*data["x"]*radians(self.gGainX),
-                self.gSign[1]*data["y"]*radians(self.gGainY),
-                self.gSign[2]*data["z"]*radians(self.gGainZ)]
-
-    def calcEulerAngles(self):
-        pitch = -asin(self.dirCosine[2][0])
-        roll = atan2(self.dirCosine[2][1], self.dirCosine[2][2])
-        yaw = atan2(self.dirCosine[1][0], self.dirCosine[0][0])
-        return pitch, roll, yaw
+    def scaleMag(self, mx, my, mz):
+        return [(self.mSign[0]*(mx - self.mMinX)) / (self.mMaxX - self.mMinX) - self.mSign[0]*0.5,
+                (self.mSign[1]*(my - self.mMinY)) / (self.mMaxY - self.mMinY) - self.mSign[1]*0.5,
+                (self.mSign[2]*(mz - self.mMinZ)) / (self.mMaxZ - self.mMinZ) - self.mSign[2]*0.5]
