@@ -42,7 +42,7 @@ class SubplotAnimation(animation.TimedAnimation):
 
     def _draw_frame(self, framedata):
         records = stream.readFromStream()
-        if not records:
+        if not records or len(records[0]) < 9:
             return
 
         values = map(int, records[0])
@@ -52,15 +52,16 @@ class SubplotAnimation(animation.TimedAnimation):
             self.ydatas[i].append(values[i])
             self.lines[i].set_data(self.xdata, self.ydatas[i])
 
-        for i in xrange(0, 9, 3):
-            ymin, ymax = self.axes[i].get_ylim()
+        if t >= 5:
+            for i in xrange(0, 9, 3):
+                ymin, ymax = self.axes[i].get_ylim()
 
-            if max(values[i:i+3]) >= ymax or min(values[i:i+3]) <= ymin:
-                minimum = min(min(self.ydatas[i:i+3]))
-                maximum = max(max(self.ydatas[i:i+3]))
-                for j in xrange(i, i+3):
-                    self.axes[j].set_ylim(minimum, maximum)
-                    self.axes[j].figure.canvas.draw()
+                if max(values[i:i+3]) >= ymax or min(values[i:i+3]) <= ymin:
+                    minimum = min(ymin + [min(values[i:i+3])])
+                    maximum = max(ymax + [max(values[i:i+3])])
+                    for j in xrange(i, i+3):
+                        self.axes[j].set_ylim(minimum, maximum)
+                        self.axes[j].figure.canvas.draw()
 
         self._drawn_artists = self.lines
 
