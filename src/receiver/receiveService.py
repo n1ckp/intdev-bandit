@@ -3,9 +3,6 @@ import argparse, sys, struct, binascii, os
 sys.path.append(os.path.abspath("../"))
 
 from utils.streamUtils.StreamWrite import StreamWrite
-
-
-
 from bleconn import BleConn
 
 parser = argparse.ArgumentParser(description = "Recive Data from smartshoes and write to a stream")
@@ -15,6 +12,7 @@ parser.add_argument("-S", action = "store", default = "random", type = str, dest
 parser.add_argument("-U", action = "store", default = None, type = int, dest = "uuid", help = "Characteristic UUID to read from (RFduino: 2221)")
 parser.add_argument("-H", action = "store", default = None, type = int, dest = "handle", help = "Characteristic Handle to read from (RFduino: 0x000e)")
 parser.add_argument("-C", action = "store_true", default = False, dest = "continuous", help = "Continuous read mode")
+parser.add_argument("-R", action = "store_true", default = False, dest = "raw", help = "Output Raw Sensor Data")
 parser.add_argument("-i", action = "store", default = "hci0", type = str, dest = "interface", help = "BLE interface (default: hci0)")
 parser.add_argument("-s", action = "store", default = "/dev/input/smartshoes", type = str, dest = "streamFile", help = "The Name of the stream to write to (default: /dev/input/smartshoes)")
 inputArgs = parser.parse_args()
@@ -37,6 +35,8 @@ def unpackFloat(hex):
 
 def unpackInt(hex):
     return struct.unpack("h", binascii.unhexlify(hex))[0]
+
+def 
 
 
 value = getValue()
