@@ -15,7 +15,7 @@ parser.add_argument("-U", action = "store", default = None, type = int, dest = "
 parser.add_argument("-H", action = "store", default = None, type = int, dest = "handle", help = "Characteristic Handle to read from (RFduino: 0x000e)")
 parser.add_argument("-C", action = "store_true", default = False, dest = "continuous", help = "Continuous read mode")
 parser.add_argument("-R", action = "store_true", default = False, dest = "raw", help = "Raw (Uncalibrated) Sensor data output")
-parser.add_argument("-LPF" action = "store_true", default = False, dest = "lpf", help = "Pass sensor values through a FIR Low Pass Filter")
+parser.add_argument("-LPF", action = "store_true", default = False, dest = "lpf", help = "Pass sensor values through a FIR Low Pass Filter")
 parser.add_argument("-i", action = "store", default = "hci0", type = str, dest = "interface", help = "BLE interface (default: hci0)")
 parser.add_argument("-s", action = "store", default = "/dev/input/smartshoes", type = str, dest = "streamFile", help = "The Name of the stream to write to (default: /dev/input/smartshoes)")
 inputArgs = parser.parse_args()
