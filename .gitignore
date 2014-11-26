@@ -1,1 +1,10 @@
 *.pyc
+
+
+# LaTeX stuff
+/doc/report/*.aux
+/doc/report/*.dvi
+/doc/report/*.txt
+/doc/report/*.out
+/doc/report/*.gz
+/doc/report/*.log
