@@ -5,6 +5,7 @@ from sklearn.linear_model import PassiveAggressiveClassifier
 from sklearn import svm
 from sklearn.naive_bayes import MultinomialNB
 from sklearn.ensemble import AdaBoostClassifier
+from sklearn.neighbors import KNeighborsClassifier
 from sklearn import cross_validation, metrics
 from sklearn.externals import joblib
 from sklearn.decomposition import PCA
@@ -72,6 +73,16 @@ def trainAdaBoost(data, classes, dump_file):
 	clf = AdaBoostClassifier(n_estimators=100)
 	baseClassifierTrain(clf, "Ada Boost Classifier", data, classes, dump_file)
 
+#perform crossfold validation on k nearest neighbor classifier
+def testKNN(data, classes, n_folds, metric=''):
+	clf = KNeighborsClassifier()
+	baseClassifierTest(clf, "K Nearest Neighbor", data, classes, n_folds, metric)
+
+#train k nearest neighbor on all data and dump model to file
+def trainKNN(data, classes, dump_file):
+	clf = KNeighborsClassifier()
+	baseClassifierTrain(clf, "K Nearest Neighbor", data, classes, dump_file)
+
 #perform crossfold validation on Multinomial NB calssifier
 def testMultinomialNaiveBayes(data, classes, n_folds, metric=''):
 	clf = MultinomialNB(alpha=1.0)
@@ -112,8 +123,8 @@ def main(args):
 
 	if args.pca_comps:
 		pca = PCA(n_components=args.pca_comps)
+		pca.fit(data)
 		data = pca.transform(data)
-		print data[0]
 
 	if args.dump_file != '':
 		if args.classifier == 'pa':
@@ -128,6 +139,8 @@ def main(args):
 			trainSVM(data, classes, args.dump_file)
 		elif args.classifier == 'ada-boost':
 			trainAdaBoost(data, classes, args.dump_file)
+		elif args.classifier == 'knn':
+			trainKNN(data, classes, args.dump_file)
 		else:
 			raise NameError("Unknown Classifer type")	
 	else:	
@@ -143,6 +156,8 @@ def main(args):
 			testSVM(data, classes, cv_folds)
 		elif args.classifier == 'ada-boost':
 			testAdaBoost(data, classes, cv_folds)
+		elif args.classifier == 'knn':
+			testKNN(data, classes, cv_folds)
 		else:
 			raise NameError("Unknown Classifer type")	
 	
