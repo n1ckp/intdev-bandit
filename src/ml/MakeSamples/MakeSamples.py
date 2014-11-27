@@ -22,8 +22,9 @@ def SamplesFromDir(directory, sep='_', data_dimensions=9):
 			line = re.sub('\s+','', line)
 			sample = line.split(',')
 			#check for corrupt data
-			if len(sample) != data_dimensions:
+			if len(sample) != data_dimensions or '' in sample:
 				break
+
 			data.append(sample)
 			classes.append(class_name)
 			seq_length = seq_length + 1

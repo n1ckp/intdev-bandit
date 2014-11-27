@@ -112,31 +112,32 @@ class main():
 
 	# Base capture method - Press space, do gesture, then press space
 	def captureExplicit(self, dir_name, gesture, displayText):
-		self.textToScreen(displayText)
+		for i in xrange(1, 5):
+			self.textToScreen(displayText)
 
-		output_file = self.makeFile(dir_name, gesture)
+			output_file = self.makeFile(dir_name, gesture)
 
-		ready = False
-		done = False
+			ready = False
+			done = False
 
-		# Wait for user to begin test
-		while not ready:
-			for event in pygame.event.get():
-				if event.type == pygame.KEYDOWN :
-					if event.key == pygame.K_SPACE :
-						ready = True
+			# Wait for user to begin test
+			while not ready:
+				for event in pygame.event.get():
+					if event.type == pygame.KEYDOWN :
+						if event.key == pygame.K_SPACE :
+							ready = True
 
-		self.stream.emptyStreamBuffer()
-		# Capture data until space is pressed
-		while not done:
-			records = self.stream.readFromStream()
-			for record in records:
-				self.writeData(output_file, record)
+			self.stream.emptyStreamBuffer()
+			# Capture data until space is pressed
+			while not done:
+				records = self.stream.readFromStream()
+				for record in records:
+					self.writeData(output_file, record)
 
-			for event in pygame.event.get():
-				if event.type == pygame.KEYDOWN :
-					if event.key == pygame.K_SPACE :
-						done = True
+				for event in pygame.event.get():
+					if event.type == pygame.KEYDOWN :
+						if event.key == pygame.K_SPACE :
+							done = True
 
 	# Capture resting gesture for 5 seconds
 	def captureREST(self, dir_name):
