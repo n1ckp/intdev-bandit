@@ -15,73 +15,81 @@ from MakeSamples.MakeSamples import SamplesFromDir
 from Evaluation import CrossValidation
 from Preprocessing.FeatureExtraction import FequencyExtraction
 
-#perform crossfold validation on passive agressive calssifier
-def testPassiveAgressive(data, classes, n_folds, metric=''):
+#Base classifier utility methods
+def baseClassifierTest(clf, clf_name, data, classes, n_folds, metric=''):
+	print("Testing: ", clf_name)
 	num_cores = multiprocessing.cpu_count()
-	clf = PassiveAggressiveClassifier(loss='squared_hinge', C=1.0)
 	scores = CrossValidation.cross_val_score(clf, data, classes, cv=n_folds, n_jobs=num_cores)
-	print("Passive Aggressive Classifier, Accuracy: %0.2f (+/- %0.2f)" % (scores.mean(), scores.std() * 2))
+	print(clf_name, ", Accuracy: %0.2f (+/- %0.2f)" % (scores.mean(), scores.std() * 2))
 
-#train passive agressive classifier on all data and dump model to file
-def trainSVM(data, classes, dump_file):
-	num_cores = multiprocessing.cpu_count()
-	clf = svm.SVC()
+def baseClassifierTrain(clf, clf_name, data, classes, dump_file):
+	print("Training: ", clf_name)
 	clf.fit(data, classes)
 	joblib.dump(clf, dump_file)
 
-#perform crossfold validation on passive agressive calssifier
-def testSVM(data, classes, n_folds, metric=''):
+def baseSeqClassifierTest(clf, clf_name, data, classes, seq_lengths, n_folds, metric=''):
+	print("Testing: ", clf_name)
 	num_cores = multiprocessing.cpu_count()
-	clf = clf = svm.SVC()
 	scores = CrossValidation.cross_val_score(clf, data, classes, cv=n_folds, n_jobs=num_cores)
-	print("Support Vector Machine Classifier, Accuracy: %0.2f (+/- %0.2f)" % (scores.mean(), scores.std() * 2))
+	print(clf_name, ", Accuracy: %0.2f (+/- %0.2f)" % (scores.mean(), scores.std() * 2))
+
+def baseSeqClassifierTrain(clf, clf_name, data, classes, seq_lengths, dump_file):
+	print("Training: ", clf_name)
+	clf.fit(data, classes, seq_lengths)
+	joblib.dump(clf, dump_file)
+
+
+#perform crossfold validation on passive agressive calssifier
+def testPassiveAgressive(data, classes, n_folds, metric=''):
+	clf = PassiveAggressiveClassifier(loss='squared_hinge', C=1.0)
+	baseClassifierTest(clf, "Passive Aggressive Classifier", data, classes, n_folds, metric)
+
 
 #train passive agressive classifier on all data and dump model to file
 def trainPassiveAgressive(data, classes, dump_file):
-	num_cores = multiprocessing.cpu_count()
-	clf = PassiveAggressiveClassifier(3, covariance_type="diag", n_iter=1000)
-	clf.fit(data, classes)
-	joblib.dump(clf, dump_file)
+	clf = PassiveAggressiveClassifier(loss='squared_hinge', C=1.0)
+	baseClassifierTrain(clf, "Passive Aggressive Classifier", data, classes, dump_file)
+
+
+#perform crossfold validation on passive agressive calssifier
+def testSVM(data, classes, n_folds, metric=''):
+	clf = svm.SVC()
+	baseClassifierTest(clf, "Support Vector Machine", data, classes, n_folds, metric)
+
+#train passive agressive classifier on all data and dump model to file
+def trainSVM(data, classes, dump_file):
+	clf = svm.SVC()
+	baseClassifierTrain(clf, "Support Vector Machine", data, classes, dump_file)
 
 #perform crossfold validation on Multinomial NB calssifier
 def testMultinomialNaiveBayes(data, classes, n_folds, metric=''):
-	num_cores = multiprocessing.cpu_count()
 	clf = MultinomialNB(alpha=1.0)
-	scores = CrossValidation.cross_val_score(clf, data, classes, cv=n_folds, n_jobs=num_cores)
-	print("Multinomial naive bayes Classifier, Accuracy: %0.2f (+/- %0.2f)" % (scores.mean(), scores.std() * 2))
+	baseClassifierTest(clf, "Multinomial Naive Bayes", data, classes, n_folds, metric)
 
 #train Multinomial NBclassifier on all data and dump model to file
 def trainMultinomialNaiveBayes(data, classes, dump_file):
-	num_cores = multiprocessing.cpu_count()
 	clf = MultinomialNB(alpha=1.0)
-	clf.fit(data, classes)
-	joblib.dump(clf, dump_file)
+	baseClassifierTrain(clf, "Multinomial Naive Bayes", data, classes, dump_file)
 
 def testStructuredPerceptron(data, classes, seq_lengths, n_folds, metric=''):
-	num_cores = multiprocessing.cpu_count()
 	clf = StructuredPerceptron(max_iter=10)
-	scores = CrossValidation.seq_cross_val_score(clf, data, classes, seq_lengths, cv=n_folds)
-	print("Structured Perceptron Classifier, Accuracy: %0.2f (+/- %0.2f)" % (scores.mean(), scores.std() * 2))
+	baseSeqClassifierTest(clf, "Structured Perceptron", data, classes, seq_lengths, n_folds, metric)
 
 #train structured classifier on all data and dump model to file
 def trainStructuredPerceptron(data, classes, seq_lengths, dump_file):
-	num_cores = multiprocessing.cpu_count()
 	clf = StructuredPerceptron(max_iter=10)
-	clf.fit(data, classes, seq_lengths)
-	joblib.dump(clf, dump_file)
+	baseSeqClassifierTrain(clf, "Structured Perceptron", data, classes, seq_lengths, dump_file)
+
 
 def testMultinomialHMM(data, classes, seq_lengths, n_folds, metric=''):
-	num_cores = multiprocessing.cpu_count()
 	clf = MultinomialHMM(decode='bestfirst', alpha=1.0)
-	scores = CrossValidation.seq_cross_val_score(clf, data, classes, seq_lengths, cv=n_folds)
-	print("Multinomial HMM Classifier, Accuracy: %0.2f (+/- %0.2f)" % (scores.mean(), scores.std() * 2))
+	baseSeqClassifierTest(clf, "Multinomial Hidden Markov Model", data, classes, seq_lengths, n_folds, metric)
+	
 
 #train multinomial HMM classifier on all data and dump model to file
 def trainMultinomialHMM(data, classes, seq_lengths, dump_file):
-	num_cores = multiprocessing.cpu_count()
 	clf = MultinomialHMM(decode='viterbi', alpha=0.01)
-	clf.fit(data, classes, seq_lengths)
-	joblib.dump(clf, dump_file)
+	baseSeqClassifierTrain(clf, "Multinomial Hidden Markov Model", data, classes, seq_lengths, dump_file)
 	
 	
 def main(args):
