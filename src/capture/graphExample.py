@@ -22,6 +22,7 @@ class SubplotAnimation(animation.TimedAnimation):
         fig = plt.figure()
         self.axes = []
         self.lines = []
+        self.annotations = []
         for i in xrange(0, 9):
             axis = fig.add_subplot(3, 3, i+1)
             axis.set_ylim(-1, 1)
@@ -32,6 +33,10 @@ class SubplotAnimation(animation.TimedAnimation):
             line = Line2D([], [])
             self.lines.append(line)
             axis.add_line(line)
+
+            annotation = axis.annotate('NaN', xy=(25, 0.8))
+            annotation.set_animated(True)
+            self.annotations.append(annotation)
 
         self.xdata = range(0, 50)
         self.ydatas = []
@@ -45,12 +50,13 @@ class SubplotAnimation(animation.TimedAnimation):
         if not records or len(records[0]) < 9:
             return
 
-        values = map(int, records[0])
+        values = map(float, records[0])
         t = framedata
         for i in xrange(0, 9):
             self.ydatas[i].pop(0)
             self.ydatas[i].append(values[i])
             self.lines[i].set_data(self.xdata, self.ydatas[i])
+            self.annotations[i].set_text(values[i])
 
         if t >= 5:
             for i in xrange(0, 9, 3):
@@ -63,7 +69,7 @@ class SubplotAnimation(animation.TimedAnimation):
                         self.axes[j].set_ylim(minimum, maximum)
                         self.axes[j].figure.canvas.draw()
 
-        self._drawn_artists = self.lines
+        self._drawn_artists = self.lines + self.annotations
 
     def new_frame_seq(self):
         return iter(range(1000))

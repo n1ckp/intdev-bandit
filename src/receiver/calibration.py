@@ -18,13 +18,13 @@ class Calibration():
         self.gGainZ = 0.07
 
          # Magnetometer (Constants need calibrating from real device)
-        self.mMinX = -421
-        self.mMinY = -639
-        self.mMinZ = -238
+        self.mMinX = -2564.0
+        self.mMinY = -2767.0
+        self.mMinZ = -2378.0
 
-        self.mMaxX = 424
-        self.mMaxY = 295
-        self.mMaxZ = 472
+        self.mMaxX = 3691
+        self.mMaxY = 3319
+        self.mMaxZ = 3935
 
     def process(self, gx, gy, gz, ax, ay, az, mx, my, mz):
         return tuple(self.scaleGyro(gx, gy, gz) + self.scaleAccel(ax, ay, az) + self.scaleMag(mx, my, mz))
