@@ -3,7 +3,7 @@
 
 #Allows for relative import
 import sys, os, argparse
-sys.path.append(os.path.abspath("../.."))
+sys.path.append(os.path.abspath("../"))
 
 from utils.streamUtils.StreamRead import StreamRead
 
