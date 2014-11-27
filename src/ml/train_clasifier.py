@@ -4,6 +4,7 @@ import multiprocessing
 from sklearn.linear_model import PassiveAggressiveClassifier
 from sklearn import svm
 from sklearn.naive_bayes import MultinomialNB
+from sklearn.ensemble import AdaBoostClassifier
 from sklearn import cross_validation, metrics
 from sklearn.externals import joblib
 from sklearn.decomposition import PCA
@@ -17,24 +18,24 @@ from Preprocessing.FeatureExtraction import FequencyExtraction
 
 #Base classifier utility methods
 def baseClassifierTest(clf, clf_name, data, classes, n_folds, metric=''):
-	print("Testing: ", clf_name)
+	print "Testing: ", clf_name
 	num_cores = multiprocessing.cpu_count()
 	scores = CrossValidation.cross_val_score(clf, data, classes, cv=n_folds, n_jobs=num_cores)
-	print(clf_name, ", Accuracy: %0.2f (+/- %0.2f)" % (scores.mean(), scores.std() * 2))
+	print clf_name , ", Accuracy: %0.2f (+/- %0.2f)" % (scores.mean(), scores.std() * 2)
 
 def baseClassifierTrain(clf, clf_name, data, classes, dump_file):
-	print("Training: ", clf_name)
+	print "Training: ", clf_name
 	clf.fit(data, classes)
 	joblib.dump(clf, dump_file)
 
 def baseSeqClassifierTest(clf, clf_name, data, classes, seq_lengths, n_folds, metric=''):
-	print("Testing: ", clf_name)
+	print "Testing: ", clf_name
 	num_cores = multiprocessing.cpu_count()
 	scores = CrossValidation.cross_val_score(clf, data, classes, cv=n_folds, n_jobs=num_cores)
-	print(clf_name, ", Accuracy: %0.2f (+/- %0.2f)" % (scores.mean(), scores.std() * 2))
+	print clf_name, ", Accuracy: %0.2f (+/- %0.2f)" % (scores.mean(), scores.std() * 2)
 
 def baseSeqClassifierTrain(clf, clf_name, data, classes, seq_lengths, dump_file):
-	print("Training: ", clf_name)
+	print "Training: ", clf_name
 	clf.fit(data, classes, seq_lengths)
 	joblib.dump(clf, dump_file)
 
@@ -60,6 +61,16 @@ def testSVM(data, classes, n_folds, metric=''):
 def trainSVM(data, classes, dump_file):
 	clf = svm.SVC()
 	baseClassifierTrain(clf, "Support Vector Machine", data, classes, dump_file)
+
+#perform crossfold validation on ada boost classifier
+def testAdaBoost(data, classes, n_folds, metric=''):
+	clf = AdaBoostClassifier(n_estimators=100)
+	baseClassifierTest(clf, "Ada Boost Classifier", data, classes, n_folds, metric)
+
+#train ada boost on all data and dump model to file
+def trainAdaBoost(data, classes, dump_file):
+	clf = AdaBoostClassifier(n_estimators=100)
+	baseClassifierTrain(clf, "Ada Boost Classifier", data, classes, dump_file)
 
 #perform crossfold validation on Multinomial NB calssifier
 def testMultinomialNaiveBayes(data, classes, n_folds, metric=''):
@@ -101,8 +112,8 @@ def main(args):
 
 	if args.pca_comps:
 		pca = PCA(n_components=args.pca_comps)
-		pca.fit(data)
 		data = pca.transform(data)
+		print data[0]
 
 	if args.dump_file != '':
 		if args.classifier == 'pa':
@@ -115,6 +126,8 @@ def main(args):
 			trainMultinomialNaiveBayes(data, classes, args.dump_file)
 		elif args.classifier == 'svm':
 			trainSVM(data, classes, args.dump_file)
+		elif args.classifier == 'ada-boost':
+			trainAdaBoost(data, classes, args.dump_file)
 		else:
 			raise NameError("Unknown Classifer type")	
 	else:	
@@ -128,6 +141,8 @@ def main(args):
 			testMultinomialNaiveBayes(data, classes, cv_folds)
 		elif args.classifier == 'svm':
 			testSVM(data, classes, cv_folds)
+		elif args.classifier == 'ada-boost':
+			testAdaBoost(data, classes, cv_folds)
 		else:
 			raise NameError("Unknown Classifer type")	
 	
