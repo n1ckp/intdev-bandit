@@ -1,6 +1,5 @@
 *.pyc
 
-
 # LaTeX stuff
 /doc/report/*.aux
 /doc/report/*.dvi
