@@ -7,6 +7,8 @@ from utils.streamUtils.StreamRead import StreamRead
 
 class main():
 	def __init__(self, inputArgs):
+		self.debug = inputArgs.debug
+
 		pygame.init()
 	 	size = width, height = 1500, 800
 	 	speed = [2, 2]
@@ -22,8 +24,9 @@ class main():
 		self.screen.blit(self.background, (0, 0))
 		pygame.display.flip()
 
-	 	#open stream reader
-		self.stream = StreamRead(inputArgs.streamFile)
+	 	# Open input file
+		if not self.debug:
+			self.stream = StreamRead(inputArgs.streamFile)
 
 		self.gesture_classes = {"REST" : self.captureREST,
 		 						"LEFT-FOOT-STOMP" : self.captureLEFT_FOOT_STOMP,
@@ -100,6 +103,11 @@ class main():
 
 		self.textToScreen("Please wait " + str(holdLength) + " seconds")
 
+		if self.debug:
+			# Don't capture data
+			time.sleep(holdLength)
+			return
+
 		# Capture data for as long as holdLength (seconds)
 		for i in xrange(0, holdLength):
 			output_file = self.makeFile(dir_name, gesture)
@@ -114,7 +122,8 @@ class main():
 	def captureExplicit(self, dir_name, gesture, displayText):
 		self.textToScreen(displayText)
 
-		output_file = self.makeFile(dir_name, gesture)
+		if not self.debug:
+			output_file = self.makeFile(dir_name, gesture)
 
 		ready = False
 		done = False
@@ -126,12 +135,14 @@ class main():
 					if event.key == pygame.K_SPACE :
 						ready = True
 
-		self.stream.emptyStreamBuffer()
+		if not self.debug:
+			self.stream.emptyStreamBuffer()
 		# Capture data until space is pressed
 		while not done:
-			records = self.stream.readFromStream()
-			for record in records:
-				self.writeData(output_file, record)
+			if not self.debug:
+				records = self.stream.readFromStream()
+				for record in records:
+					self.writeData(output_file, record)
 
 			for event in pygame.event.get():
 				if event.type == pygame.KEYDOWN :
@@ -184,7 +195,10 @@ class main():
 if __name__ == "__main__":
 	parser = argparse.ArgumentParser(description = "Capture traing data for smartshoes")
 	parser.add_argument("DIR", action = "store", type = str, help = "The directory to store captured data in")
+	parser.add_argument("-d", action = "store_true", dest = "debug", help = "Turn debug mode on (run without device)")
 	parser.add_argument("-n", action = "store", default = 5, type = int, dest = "num_trials", help = "The Number of times to capture data for each gesture (default : 10)")
 	parser.add_argument("-s", action = "store", default = "/dev/input/smartshoes", type = str, dest = "streamFile", help = "The Name of the stream to read input from (default: /dev/input/smartshoes)")
 	inputArgs = parser.parse_args()
+	if inputArgs.debug:
+		print("DEBUG MODE ENABLED")
 	main(inputArgs)
