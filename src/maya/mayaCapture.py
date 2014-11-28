@@ -1,5 +1,5 @@
 # Module for getting device input and talking to Maya to get model to update
-import socket, time, json, random, argparse
+import socket, time, json, random, argparse, re
 
 def main(args):
     maya = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -19,7 +19,11 @@ def main(args):
             data["ANKLE_L"]["rx"] = random.uniform(0,20)
             data["ANKLE_L"]["ry"] = random.uniform(0,20)
             data["ANKLE_L"]["rz"] = random.uniform(0,20)
-            maya.send(json.dumps(data))
+            data["ANKLE_L"]["tx"] = random.uniform(0,10)
+            data["ANKLE_L"]["ty"] = random.uniform(0,10)
+            data["ANKLE_L"]["tz"] = random.uniform(0,10)
+            jsonData = re.sub(r"\"", "\'", json.dumps(data))
+            maya.send(jsonData)
             time.sleep(0.1)
         return
 
