@@ -1,6 +1,6 @@
 # All coordinates are Z up
 import random
-import sys, os
+import os, sys, time
 sys.path.append(os.path.abspath("../"))
 
 from direct.actor.Actor import Actor
@@ -58,19 +58,22 @@ class MayaDemo(ShowBase):
         self.walkJointHierarchy(self.bandit, self.bandit.getPartBundle('modelRoot'))
 
         self.stream = StreamRead("/dev/input/smartshoes")
-        self.last_t = globalClock.getFrameTime()
+        self.last_t = time.time()
         taskMgr.add(self.getDeviceData, 'Stream reader')
 
     def getDeviceData(self, task):
         records = self.stream.readFromStream()
-        if records and len(records[0]) == 9:
-            # TODO: Get a dt from the reciever
-            # This timing code isn't strictly true
-            time = globalClock.getFrameTime()
-            dt = time - self.last_t
-            self.last_t = time
+        if records and len(records[0]) == 10:
             records = map(float, records[0])
+            dt = records[9] - self.last_t
+            self.last_t = records[9]
             angular_velocity, acceleration, magnetic_field = [records[x:x+3] for x in range(0, 9, 3)]
+
+            # Switch axis orientations
+            angular_velocity[2], angular_velocity[0] = angular_velocity[0], angular_velocity[2]
+            acceleration[2], acceleration[0] = acceleration[0], acceleration[2]
+            magnetic_field[2], magnetic_field[0] = magnetic_field[0], magnetic_field[2]
+
             rotationMagic.rotationMagic(self.r_leg.ankle_rotation, dt, angular_velocity, acceleration, magnetic_field)
             self.r_leg.updateAnkleRotation()
         return task.again

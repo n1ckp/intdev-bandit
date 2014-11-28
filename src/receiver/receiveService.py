@@ -1,4 +1,4 @@
-import argparse, sys, struct, binascii, os
+import argparse, sys, struct, binascii, os, time
 #Allows for relative import
 sys.path.append(os.path.abspath("../"))
 
@@ -46,6 +46,7 @@ if inputArgs.debug:
 stream = StreamWrite(inputArgs.streamFile)
 while inputArgs.continuous:
     value = getValue()
+    timestamp = time.time()
     hexStr = "".join(value.split(" "))
     gx = unpackInt(hexStr[:4])
     gy = unpackInt(hexStr[4:8])
@@ -60,8 +61,8 @@ while inputArgs.continuous:
     if not inputArgs.raw:
         gx, gy, gz, ax, ay, az, mx, my, mz = c.process(gx, gy, gz, ax, ay, az, mx, my, mz)
 
-    stream.writeToStream([gx,gy,gz,ax,ay,az,mx,my,mz])
+    stream.writeToStream([gx,gy,gz,ax,ay,az,mx,my,mz,timestamp])
 
     if inputArgs.debug:
         #print value
-        print "gx: " + str(gx) + " gy: " + str(gy) + " gz: " + str(gz) + " ax: " + str(ax) + " ay: " + str(ay) + " az: " + str(az) + " mx: " + str(mx) + " my: " + str(my) + " mz: " + str(mz)
+        print str(timestamp) + " gx: " + str(gx) + " gy: " + str(gy) + " gz: " + str(gz) + " ax: " + str(ax) + " ay: " + str(ay) + " az: " + str(az) + " mx: " + str(mx) + " my: " + str(my) + " mz: " + str(mz)

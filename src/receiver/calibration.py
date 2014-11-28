@@ -3,8 +3,8 @@ import math
 class Calibration():
     def __init__(self):
         # General
-        self.gSign = [1, 1, 1]
-        self.aSign = [1, 1, 1]
+        self.gSign = [1, -1, 1]
+        self.aSign = [-1, -1, -1]
         self.mSign = [1, 1, 1]
 
         # Accelerometer

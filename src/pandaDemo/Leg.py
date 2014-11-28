@@ -137,4 +137,4 @@ class Leg:
         self.updateAnkleRotation()
 
     def updateAnkleRotation(self):
-        self.ankle_wo.setHpr(self.ankle_rotation.getHpr())
+        self.ankle_wo.setHpr(self.ankle_rotation.getHpr() + (0, 0, -90))
