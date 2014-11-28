@@ -65,8 +65,6 @@ class MayaDemo(ShowBase):
         records = self.stream.readFromStream()
         if records and len(records[0]) == 10:
             records = map(float, records[0])
-            dt = records[9] - self.last_t
-            self.last_t = records[9]
             angular_velocity, acceleration, magnetic_field = [records[x:x+3] for x in range(0, 9, 3)]
 
             # Switch axis orientations
@@ -74,7 +72,7 @@ class MayaDemo(ShowBase):
             acceleration[2], acceleration[0] = acceleration[0], acceleration[2]
             magnetic_field[2], magnetic_field[0] = magnetic_field[0], magnetic_field[2]
 
-            self.r_leg.ankle_rotation.rotationMagic(dt, angular_velocity, acceleration, magnetic_field)
+            self.r_leg.ankle_rotation.rotationMagic(records[9], angular_velocity, acceleration, magnetic_field)
             self.r_leg.updateAnkleRotation()
         return task.again
 

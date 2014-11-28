@@ -1,3 +1,5 @@
+import time
+
 from panda3d.core import LMatrix4, LQuaternion, Vec3
 
 class RotationCorrector():
@@ -6,6 +8,7 @@ class RotationCorrector():
             self.rotation = LQuaternion()
         else:
             self.rotation = LQuaternion(1, *init_rotation)
+        self.last_t = time.time()
 
     def getHpr(self):
         return self.rotation.getHpr()
@@ -34,7 +37,10 @@ class RotationCorrector():
         rotation *= LQuaternion(1, w*dt/2)
         rotation.normalize()
 
-    def rotationMagic(self, dt, angular_velocity, acceleration, magnetic_field):
+    def rotationMagic(self, timestamp, angular_velocity, acceleration, magnetic_field):
+        dt = timestamp - self.last_t
+        self.last_t = timestamp
+
         angular_velocity = Vec3(*angular_velocity)
         acceleration = Vec3(*acceleration)
         magnetic_field = Vec3(*magnetic_field)
