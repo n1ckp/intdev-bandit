@@ -166,7 +166,7 @@ class main():
 				for record in records:
 					self.writeData(output_file, record)
 
-	# Base capture method - Press space, do gesture, then press space
+# Base capture method - Press space, do gesture, then press space
 	def captureExplicit(self, dir_name, gesture, displayText):
 		self.textToScreen("Press SPACE, " + displayText + ", and then press SPACE as soon as you are done")
 
@@ -197,8 +197,8 @@ class main():
 
 			for event in pygame.event.get():
 				if event.type == pygame.KEYDOWN :
-					# Check that we've captured data for at least half a second before quitting
-					if event.key == pygame.K_SPACE and time.time() > startTime+0.5 :
+					# Check that we've captured data for at least 0.3 seconds before quitting
+					if event.key == pygame.K_SPACE and time.time() > startTime+0.3 :
 						done = True
 
 if __name__ == "__main__":
