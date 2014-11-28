@@ -21,7 +21,7 @@ y = 0.0
 z = 0.0
 while iterations < 32:
     records = stream.readFromStream()
-    if records and len(records[0]) == 9:
+    if records and len(records[0]) == 10:
         x += float(records[0][3])
         y += float(records[0][4])
         z += float(records[0][5])

@@ -21,7 +21,7 @@ zs = []
 try:
     while len(xs) < 1000:
         records = stream.readFromStream()
-        if records and len(records[0]) == 9:
+        if records and len(records[0]) == 10:
             xs.append(int(records[0][6]))
             ys.append(int(records[0][7]))
             zs.append(int(records[0][8]))
