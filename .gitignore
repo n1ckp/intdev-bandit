@@ -1,5 +1,4 @@
 *.pyc
-
 # LaTeX stuff
 /doc/report/*.aux
 /doc/report/*.dvi
@@ -9,3 +8,5 @@
 /doc/report/*.log
 # Maya stuff
 .mayaSwatches/
+# osx files
+.DS_Store
