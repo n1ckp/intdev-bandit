@@ -9,7 +9,7 @@ from panda3d.core import CharacterJoint, LineSegs
 
 import numpy as np
 
-import Leg, utils.rotationMagic
+import Leg
 from utils.streamUtils.StreamRead import StreamRead
 
 class MayaDemo(ShowBase):
@@ -74,7 +74,7 @@ class MayaDemo(ShowBase):
             acceleration[2], acceleration[0] = acceleration[0], acceleration[2]
             magnetic_field[2], magnetic_field[0] = magnetic_field[0], magnetic_field[2]
 
-            utils.rotationMagic.rotationMagic(self.r_leg.ankle_rotation, dt, angular_velocity, acceleration, magnetic_field)
+            self.r_leg.ankle_rotation.rotationMagic(dt, angular_velocity, acceleration, magnetic_field)
             self.r_leg.updateAnkleRotation()
         return task.again
 

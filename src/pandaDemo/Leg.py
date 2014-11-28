@@ -1,9 +1,13 @@
 # Adapted from https://github.com/studywolf/blog/tree/master/InvKin
+import sys
+sys.path.append("../")
+
 import math
 import numpy as np
 import scipy.optimize
 
 from panda3d.core import LQuaternion, MeshDrawer, OmniBoundingVolume, Vec3, Vec4
+from utils.rotationMagic import RotationCorrector
 
 class Leg:
     def __init__(self, hip_ro, hip_wo, knee_ro, knee_wo, ankle_ro, ankle_wo, L, q=[math.pi/4, math.pi/4], q0=np.array([math.pi/4, math.pi/4])):
@@ -28,8 +32,7 @@ class Leg:
 
         self.desired_ankle_pos = self.ankle_ro.getPos(render)
 
-        self.ankle_rotation = LQuaternion()
-        self.ankle_rotation.setHpr(self.ankle_ro.getHpr())
+        self.ankle_rotation = RotationCorrector(self.ankle_ro.getHpr())
 
         """
         # Debug visuals
