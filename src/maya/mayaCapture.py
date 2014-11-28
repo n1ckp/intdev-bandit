@@ -7,7 +7,7 @@ def main(args):
     maya.connect(("127.0.0.1", 7777))
 
     vals = {"tx" : 0, "ty" : 0, "tz" : 0, "rx" : 0, "ry" : 0, "rz" : 0}
-    data = {"ANKLE_L" : vals, "TOE_L" : vals, "ANKLE_R" : vals, "TOE_R" : vals}
+    data = {"ANKLE_L" : vals.copy(), "TOE_L" : vals.copy(), "ANKLE_R" : vals.copy(), "TOE_R" : vals.copy()}
 
     startTime = time.time()
     duration = 60
@@ -22,7 +22,14 @@ def main(args):
             data["ANKLE_L"]["tx"] = random.uniform(0,10)
             data["ANKLE_L"]["ty"] = random.uniform(0,10)
             data["ANKLE_L"]["tz"] = random.uniform(0,10)
+            data["ANKLE_R"]["rx"] = random.uniform(0,20)
+            data["ANKLE_R"]["ry"] = random.uniform(0,20)
+            data["ANKLE_R"]["rz"] = random.uniform(0,20)
+            data["ANKLE_R"]["tx"] = random.uniform(0,10)
+            data["ANKLE_R"]["ty"] = random.uniform(0,10)
+            data["ANKLE_R"]["tz"] = random.uniform(0,10)
             jsonData = re.sub(r"\"", "\'", json.dumps(data))
+            print(jsonData)
             maya.send(jsonData)
             time.sleep(0.1)
         return
