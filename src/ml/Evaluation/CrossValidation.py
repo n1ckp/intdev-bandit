@@ -6,7 +6,7 @@ import numpy
 import matplotlib.pyplot as plt
 
 #Perform stratified crossvcalidation on sequence classifiers
-def seq_cross_val_score(clf, data, classes, seq_lengths, cv=10, show_cm=True):
+def seq_cross_val_score(clf, data, classes, seq_lengths, cv=10, n_jobs=1, show_cm=True):
 	scores = []
 	folds = SequenceKFold(seq_lengths, cv)
 	folds = seqStratifiedKFold(classes, seq_lengths, cv=10)

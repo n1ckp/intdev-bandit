@@ -32,7 +32,7 @@ def baseClassifierTrain(clf, clf_name, data, classes, dump_file):
 def baseSeqClassifierTest(clf, clf_name, data, classes, seq_lengths, n_folds, metric=''):
 	print "Testing: ", clf_name
 	num_cores = multiprocessing.cpu_count()
-	scores = CrossValidation.cross_val_score(clf, data, classes, cv=n_folds, n_jobs=num_cores)
+	scores = CrossValidation.seq_cross_val_score(clf, data, classes, seq_lengths, cv=n_folds, n_jobs=num_cores)
 	print clf_name, ", Accuracy: %0.2f (+/- %0.2f)" % (scores.mean(), scores.std() * 2)
 
 def baseSeqClassifierTrain(clf, clf_name, data, classes, seq_lengths, dump_file):
@@ -116,7 +116,7 @@ def trainMultinomialHMM(data, classes, seq_lengths, dump_file):
 	
 def main(args):
 	cv_folds = 10
-	data, classes, seq_lengths = SamplesFromDir(args.input_dir)
+	data, classes, seq_lengths = SamplesFromDir(args.input_dir, exclude_classes=args.exclude)
 
 	if args.preprocess == 'freq':
 		data, classes = FequencyExtraction(data, classes, seq_lengths)
@@ -169,5 +169,6 @@ if __name__ == "__main__":
 	parser.add_argument('--classifier', default='pa', help="The directory containing taring data files of the form <class>_<uuid>.csv")
 	parser.add_argument('--pca', default=0, type=int, dest='pca_comps', help="The Number of components to extract with pca (default : 0<off>)")
 	parser.add_argument('--preprocess', default='', dest='preprocess', help="Apply preprocessing to data <freq>")
+	parser.add_argument('--exclude', nargs='+', type=str, default=[], dest='exclude', help="Exlude classes from the input")
 	args = parser.parse_args()
 	main(args)
