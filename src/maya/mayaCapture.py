@@ -1,5 +1,10 @@
 # Module for getting device input and talking to Maya to get model to update
 import socket, time, json, random, argparse, re
+import sys, os
+sys.path.append(os.path.abspath("../"))
+
+from utils.rotationMagic import RotationCorrector
+from utils.streamUtils.StreamRead import StreamRead
 
 def main(args):
     maya = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -11,6 +16,8 @@ def main(args):
 
     startTime = time.time()
     duration = 60
+
+    stream = StreamRead("/dev/input/smartshoes")
 
     # DEBUGGING (RUN WITHOUT DEVICE)
     if args.debug:
@@ -34,9 +41,24 @@ def main(args):
             time.sleep(0.1)
         return
 
+    r_leg_rotation = RotationCorrector()
     while time.time() < startTime + duration:
-        maya.send(json.dumps(data))
-        time.sleep(0.1)
+        records = stream.readFromStream()
+        if records and len(records[0]) == 10:
+            records = map(float, records[0])
+
+            angular_velocity, acceleration, magnetic_field = [records[x:x+3] for x in range(0, 9, 3)]
+
+            # Switch axis orientations
+            #angular_velocity[2], angular_velocity[0] = angular_velocity[0], angular_velocity[2]
+            #acceleration[2], acceleration[0] = acceleration[0], acceleration[2]
+            #magnetic_field[2], magnetic_field[0] = magnetic_field[0], magnetic_field[2]
+
+            r_leg_rotation.rotationMagic(records[9], angular_velocity, acceleration, magnetic_field)
+
+            data["ANKLE_R"]["ry"], data["ANKLE_R"]["rx"], data["ANKLE_R"]["rz"] = r_leg_rotation.getHpr()
+            jsonData = re.sub(r"\"", "\'", json.dumps(data))
+            maya.send(jsonData)
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description = "Capture device data and display on Maya")
