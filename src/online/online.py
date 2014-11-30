@@ -27,17 +27,17 @@ class main():
 		fft = args.fft
 		self.queue = []
 		data_dimensions = 9
-		self.c = calibration.Calibration()
+		#self.c = calibration.Calibration()
 		print "Initialising buffer, please wait"
 		self.stream = StreamRead(args.input_stream)
 		while len(self.queue) < args.window_size:
 			records = self.stream.readFromStream()
 			for record in records:
 				if len(record) == data_dimensions and '' not in record:
-					record = list(self.c.process(*[float(i) for i in record]))
-					record[3] = -1533
-					record[4] = -1533
-					record[5] = -1533
+					#record = list(self.c.process(*[float(i) for i in record]))
+					#record[3] = -1533
+					#record[4] = -1533
+					#record[5] = -1533
 					self.queue.append(record)
 
 		print "Initialised"
@@ -62,10 +62,10 @@ class main():
 			records = self.stream.readFromStream()
 			for record in records:
 				if len(record) == data_dimensions and '' not in record:
-					record = list(self.c.process(*[float(i) for i in record]))
-					record[3] = -1533
-					record[4] = -1533
-					record[5] = -1533
+					#record = list(self.c.process(*[float(i) for i in record]))
+					#record[3] = -1533
+					#record[4] = -1533
+					#record[5] = -1533
 					self.queue.append(record)
 
 
