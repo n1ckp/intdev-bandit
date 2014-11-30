@@ -10,3 +10,9 @@
 
 #Prelimiary Data
 preliminaryData/*
+
+# Maya stuff
+.mayaSwatches/
+# osx files
+.DS_Store
+
