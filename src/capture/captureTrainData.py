@@ -71,14 +71,6 @@ class main():
 								"className" : "LEFT-FOOT-FLICKRIGHT",
 								"type" : "EXPL",
 								"desc" : "flick your left foot to the right"},
-								{
-								"className" : "LEFT-FOOT-SPINCW",
-								"type" : "EXPL",
-								"desc" : "spin your left foot clockwise"},
-								{
-								"className" : "LEFT-FOOT-SPINACW",
-								"type" : "EXPL",
-								"desc" : "spin your left foot anticlockwise"},
 								]
 
 		#generate trial orders
