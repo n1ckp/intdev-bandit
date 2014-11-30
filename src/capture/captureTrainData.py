@@ -1,6 +1,7 @@
 #Allows for relative import
 import sys, os, argparse, random, uuid, time
 import pygame
+from GIFImage import GIFImage
 sys.path.append(os.path.abspath("../"))
 
 from utils.streamUtils.StreamRead import StreamRead
@@ -70,14 +71,6 @@ class main():
 								"className" : "LEFT-FOOT-FLICKRIGHT",
 								"type" : "EXPL",
 								"desc" : "flick your left foot to the right"},
-								{
-								"className" : "LEFT-FOOT-SPINCW",
-								"type" : "EXPL",
-								"desc" : "spin your left foot clockwise"},
-								{
-								"className" : "LEFT-FOOT-SPINACW",
-								"type" : "EXPL",
-								"desc" : "spin your left foot anticlockwise"},
 								]
 
 		#generate trial orders
@@ -124,10 +117,14 @@ class main():
 	#Display message and wait for next test
 	def endTrial(self):
 		self.textToScreen("Thank you. Please rest your feet and wait for the next test.")
-		time.sleep(2)
+		sleepEnd = time.time() + 2
+		while time.time() < sleepEnd:
+			for event in pygame.event.get():
+				if event.type == pygame.KEYDOWN :
+					# Means that spaces don't carry over to next trial
+					pass
 
 	## File Utilities ##
-
 	#make data file with Class name an Uniqie ID
 	def makeFile(self, dir_name, class_name):
 		return file(os.path.join(dir_name, class_name + '_' + str(uuid.uuid1()) + '.csv'), 'w+')
@@ -141,10 +138,19 @@ class main():
 	# Base capture method - Press space, do gesture and hold
 	def captureHold(self, dir_name, gesture, displayText):
 		self.textToScreen("Press SPACE, " + displayText + ", and hold for the next " + str(self.numSamples) + " seconds")
+		img = GIFImage("images/" + gesture + ".gif")
+		img.play()
+		img_size = img.get_size()
+		img_pos = (self.screen.get_size()[0]/2) - (img_size[0]/2), (self.screen.get_size()[1]/2) - (img_size[1]/2)
+		img.render(self.screen, img_pos)
+		pygame.display.flip()
+
 		ready = False
 
 		# Wait for user to begin test
 		while not ready:
+			img.render(self.screen, img_pos)
+			pygame.display.flip()
 			for event in pygame.event.get():
 				if event.type == pygame.KEYDOWN :
 					if event.key == pygame.K_SPACE :
@@ -161,7 +167,7 @@ class main():
 		for i in xrange(0, self.numSamples):
 			self.textToScreen("Please wait " + str(self.numSamples-i) + " seconds")
 			output_file = self.makeFile(dir_name, gesture)
-			output_file_calibrated = self.makeFile(dir_name + "_calib", gesture)
+			#output_file_calibrated = self.makeFile(dir_name + "_calib", gesture)
 			self.stream.emptyStreamBuffer()
 			stop = time.time() + 1
 			while time.time() < stop:
@@ -176,16 +182,24 @@ class main():
 # Base capture method - Press space, do gesture, then press space
 	def captureExplicit(self, dir_name, gesture, displayText):
 		self.textToScreen("Press SPACE, " + displayText + ", and then press SPACE as soon as you are done")
+		img = GIFImage("images/" + gesture + ".gif")
+		img.play()
+		img_size = img.get_size()
+		img_pos = (self.screen.get_size()[0]/2) - (img_size[0]/2), (self.screen.get_size()[1]/2) - (img_size[1]/2)
+		img.render(self.screen, img_pos)
+		pygame.display.flip()
 
 		if not self.debug:
 			output_file = self.makeFile(dir_name, gesture)
-			output_file_calibrated = self.makeFile(dir_name + "_calib", gesture)
+			#output_file_calibrated = self.makeFile(dir_name + "_calib", gesture)
 
 		ready = False
 		done = False
 
 		# Wait for user to begin test
 		while not ready:
+			img.render(self.screen, img_pos)
+			pygame.display.flip()
 			for event in pygame.event.get():
 				if event.type == pygame.KEYDOWN :
 					if event.key == pygame.K_SPACE :
