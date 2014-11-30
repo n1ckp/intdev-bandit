@@ -1,4 +1,5 @@
 *.pyc
+
 # LaTeX stuff
 /doc/report/*.aux
 /doc/report/*.dvi
@@ -6,7 +7,12 @@
 /doc/report/*.out
 /doc/report/*.gz
 /doc/report/*.log
+
+#Prelimiary Data
+preliminaryData/*
+
 # Maya stuff
 .mayaSwatches/
 # osx files
 .DS_Store
+
