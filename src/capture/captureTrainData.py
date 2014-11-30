@@ -9,7 +9,7 @@ from receiver import calibration
 class main():
 	def __init__(self, inputArgs):
 		self.debug = inputArgs.debug
-
+		exclude_idxs = [9]
 		# Value to determine how long to wait for hold gestures, and how many
 		# samples to take for explicit gestures
 		self.numSamples = 5
@@ -36,7 +36,7 @@ class main():
 
 	 	# Open input file
 		if not self.debug:
-			self.stream = StreamRead(inputArgs.streamFile)
+			self.stream = StreamRead(inputArgs.streamFile, exclude_indexes = exclude_idxs)
 
 		self.gesture_classes = [{
 								"className" : "REST",
