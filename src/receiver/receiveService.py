@@ -1,12 +1,10 @@
-import argparse, sys, struct, binascii, os
+import argparse, sys, struct, binascii, os, time
 #Allows for relative import
 sys.path.append(os.path.abspath("../"))
 
 from utils.streamUtils.StreamWrite import StreamWrite
-
-
-
 from bleconn import BleConn
+from calibration import Calibration
 
 parser = argparse.ArgumentParser(description = "Recive Data from smartshoes and write to a stream")
 parser.add_argument("MAC", action = "store", type = str, help = "BLE device MAC address e.g. AB:CD:EF:12:34:56")
@@ -15,6 +13,7 @@ parser.add_argument("-S", action = "store", default = "random", type = str, dest
 parser.add_argument("-U", action = "store", default = None, type = int, dest = "uuid", help = "Characteristic UUID to read from (RFduino: 2221)")
 parser.add_argument("-H", action = "store", default = None, type = int, dest = "handle", help = "Characteristic Handle to read from (RFduino: 0x000e)")
 parser.add_argument("-C", action = "store_true", default = False, dest = "continuous", help = "Continuous read mode")
+parser.add_argument("-R", action = "store_true", default = False, dest = "raw", help = "Raw (Uncalibrated) Sensor data output")
 parser.add_argument("-i", action = "store", default = "hci0", type = str, dest = "interface", help = "BLE interface (default: hci0)")
 parser.add_argument("-s", action = "store", default = "/dev/input/smartshoes", type = str, dest = "streamFile", help = "The Name of the stream to write to (default: /dev/input/smartshoes)")
 inputArgs = parser.parse_args()
@@ -38,6 +37,7 @@ def unpackFloat(hex):
 def unpackInt(hex):
     return struct.unpack("h", binascii.unhexlify(hex))[0]
 
+c = Calibration()
 
 value = getValue()
 if inputArgs.debug:
@@ -46,6 +46,7 @@ if inputArgs.debug:
 stream = StreamWrite(inputArgs.streamFile)
 while inputArgs.continuous:
     value = getValue()
+    timestamp = time.time()
     hexStr = "".join(value.split(" "))
     gx = unpackInt(hexStr[:4])
     gy = unpackInt(hexStr[4:8])
@@ -56,7 +57,12 @@ while inputArgs.continuous:
     mx = unpackInt(hexStr[24:28])
     my = unpackInt(hexStr[28:32])
     mz = unpackInt(hexStr[32:36])
-    stream.writeToStream([gx,gy,gz,ax,ay,az,mx,my,mz])
+
+    if not inputArgs.raw:
+        gx, gy, gz, ax, ay, az, mx, my, mz = c.process(gx, gy, gz, ax, ay, az, mx, my, mz)
+
+    stream.writeToStream([gx,gy,gz,ax,ay,az,mx,my,mz,timestamp])
+
     if inputArgs.debug:
         #print value
-        print "gx: " + str(gx) + " gy: " + str(gy) + " gz: " + str(gz) + " ax: " + str(ax) + " ay: " + str(ay) + " az: " + str(az) + " mx: " + str(mx) + " my: " + str(my) + " mz: " + str(mz)
+        print str(timestamp) + " gx: " + str(gx) + " gy: " + str(gy) + " gz: " + str(gz) + " ax: " + str(ax) + " ay: " + str(ay) + " az: " + str(az) + " mx: " + str(mx) + " my: " + str(my) + " mz: " + str(mz)

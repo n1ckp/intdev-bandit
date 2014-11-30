@@ -22,6 +22,7 @@ class SubplotAnimation(animation.TimedAnimation):
         fig = plt.figure()
         self.axes = []
         self.lines = []
+        self.annotations = []
         for i in xrange(0, 9):
             axis = fig.add_subplot(3, 3, i+1)
             axis.set_ylim(-1, 1)
@@ -33,6 +34,10 @@ class SubplotAnimation(animation.TimedAnimation):
             self.lines.append(line)
             axis.add_line(line)
 
+            annotation = axis.annotate('NaN', xy=(25, 0.8))
+            annotation.set_animated(True)
+            self.annotations.append(annotation)
+
         self.xdata = range(0, 50)
         self.ydatas = []
         for i in xrange(0, 9):
@@ -42,27 +47,29 @@ class SubplotAnimation(animation.TimedAnimation):
 
     def _draw_frame(self, framedata):
         records = stream.readFromStream()
-        if not records:
+        if not records or len(records[0]) < 9:
             return
 
-        values = map(int, records[0])
+        values = map(float, records[0])
         t = framedata
         for i in xrange(0, 9):
             self.ydatas[i].pop(0)
             self.ydatas[i].append(values[i])
             self.lines[i].set_data(self.xdata, self.ydatas[i])
+            self.annotations[i].set_text(values[i])
 
-        for i in xrange(0, 9, 3):
-            ymin, ymax = self.axes[i].get_ylim()
+        if t >= 5:
+            for i in xrange(0, 9, 3):
+                ymin, ymax = self.axes[i].get_ylim()
 
-            if max(values[i:i+3]) >= ymax or min(values[i:i+3]) <= ymin:
-                minimum = min(min(self.ydatas[i:i+3]))
-                maximum = max(max(self.ydatas[i:i+3]))
-                for j in xrange(i, i+3):
-                    self.axes[j].set_ylim(minimum, maximum)
-                    self.axes[j].figure.canvas.draw()
+                if max(values[i:i+3]) >= ymax or min(values[i:i+3]) <= ymin:
+                    minimum = min(ymin + [min(values[i:i+3])])
+                    maximum = max(ymax + [max(values[i:i+3])])
+                    for j in xrange(i, i+3):
+                        self.axes[j].set_ylim(minimum, maximum)
+                        self.axes[j].figure.canvas.draw()
 
-        self._drawn_artists = self.lines
+        self._drawn_artists = self.lines + self.annotations
 
     def new_frame_seq(self):
         return iter(range(1000))
