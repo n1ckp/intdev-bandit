@@ -27,6 +27,9 @@ class Calibration():
         self.mMaxZ = 3935
 
     def process(self, gx, gy, gz, ax, ay, az, mx, my, mz):
+        ax = int(ax)
+        ay = int(ay)
+        az = int(az)
         return tuple(self.scaleGyro(gx, gy, gz) + self.scaleAccel(ax, ay, az) + self.scaleMag(mx, my, mz))
 
     def scaleGyro(self, gx, gy, gz):

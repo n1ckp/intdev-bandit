@@ -1,0 +1,13 @@
+#best configuration - Support Vector Machine, Accuracy: 0.92 (+/- 0.13)
+\python train_clasifier.py  --classifier svm --exclude LEFT-TOE-TAP LEFT-FOOT-FLICKLEFT LEFT-FOOT-FLICKRIGHT --preprocess freq  --pca 12 ../../experimentData/trainData_calib/
+
+#best configuration no exclusion - Support Vector Machine, Accuracy: 0.78 (+/- 0.13)
+python train_clasifier.py  --classifier svm  --preprocess freq  --pca 12 ../../experimentData/trainData_calib/
+
+#best configuration no exclusion no pca - Support Vector Machine , Accuracy: 0.71 (+/- 0.14)
+python train_clasifier.py  --classifier svm  --preprocess freq  ../../experimentData/trainData_calib/
+
+#best configuration no exclusions raw data Support Vector Machine, Accuracy: 0.12 (+/- 0.04)
+python train_clasifier.py  --classifier svm  --preprocess freq  --pca 12 ../../experimentData/trainData
+
+

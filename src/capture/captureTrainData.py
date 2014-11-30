@@ -4,6 +4,7 @@ import pygame
 sys.path.append(os.path.abspath("../"))
 
 from utils.streamUtils.StreamRead import StreamRead
+from receiver import calibration
 
 class main():
 	def __init__(self, inputArgs):
@@ -31,6 +32,7 @@ class main():
 		# Blit everything to the screen
 		self.screen.blit(self.background, (0, 0))
 		pygame.display.flip()
+		#self.c = calibration.Calibration()
 
 	 	# Open input file
 		if not self.debug:
@@ -159,12 +161,17 @@ class main():
 		for i in xrange(0, self.numSamples):
 			self.textToScreen("Please wait " + str(self.numSamples-i) + " seconds")
 			output_file = self.makeFile(dir_name, gesture)
+			output_file_calibrated = self.makeFile(dir_name + "_calib", gesture)
 			self.stream.emptyStreamBuffer()
 			stop = time.time() + 1
 			while time.time() < stop:
 				records = self.stream.readFromStream()
 				for record in records:
 					self.writeData(output_file, record)
+					#if len(record) < 9:
+					#	self.writeData(output_file_calibrated, record)
+					#else:
+					#	self.writeData(output_file_calibrated, list(self.c.process(*[float(i) for i in record])))
 
 # Base capture method - Press space, do gesture, then press space
 	def captureExplicit(self, dir_name, gesture, displayText):
@@ -172,6 +179,7 @@ class main():
 
 		if not self.debug:
 			output_file = self.makeFile(dir_name, gesture)
+			output_file_calibrated = self.makeFile(dir_name + "_calib", gesture)
 
 		ready = False
 		done = False
@@ -194,6 +202,10 @@ class main():
 				records = self.stream.readFromStream()
 				for record in records:
 					self.writeData(output_file, record)
+					#if len(record) < 9:
+					#	self.writeData(output_file_calibrated, record)
+					#else:
+					#	self.writeData(output_file_calibrated, list(self.c.process(*[float(i) for i in record])))
 
 			for event in pygame.event.get():
 				if event.type == pygame.KEYDOWN :
