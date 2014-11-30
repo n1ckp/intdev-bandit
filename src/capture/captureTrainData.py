@@ -175,7 +175,7 @@ class main():
 		for i in xrange(0, self.numSamples):
 			self.textToScreen("Please wait " + str(self.numSamples-i) + " seconds")
 			output_file = self.makeFile(dir_name, gesture)
-			output_file_calibrated = self.makeFile(dir_name + "_calib", gesture)
+			#output_file_calibrated = self.makeFile(dir_name + "_calib", gesture)
 			self.stream.emptyStreamBuffer()
 			stop = time.time() + 1
 			while time.time() < stop:
@@ -199,7 +199,7 @@ class main():
 
 		if not self.debug:
 			output_file = self.makeFile(dir_name, gesture)
-			output_file_calibrated = self.makeFile(dir_name + "_calib", gesture)
+			#output_file_calibrated = self.makeFile(dir_name + "_calib", gesture)
 
 		ready = False
 		done = False
