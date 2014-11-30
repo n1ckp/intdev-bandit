@@ -64,14 +64,10 @@ while inputArgs.continuous:
     if not inputArgs.raw:
         gx, gy, gz, ax, ay, az, mx, my, mz = c.process(gx, gy, gz, ax, ay, az, mx, my, mz)
 
-<<<<<<< HEAD
     if inputArgs.lpf:
         gx, gy, gz, ax, ay, az, mx, my, mz = dsp.lowPass(gx, gy, gz, ax, ay, az, mx, my, mz)
 
-    stream.writeToStream([gx,gy,gz,ax,ay,az,mx,my,mz])
-=======
     stream.writeToStream([gx,gy,gz,ax,ay,az,mx,my,mz,timestamp])
->>>>>>> master
 
     if inputArgs.debug:
         #print value
