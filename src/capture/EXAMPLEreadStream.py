@@ -17,4 +17,5 @@ while True:
     records = stream.readFromStream()
     if records:
         for recordList in records:
-            print map((lambda x: "%05d" % int(x)), recordList)
+        	print recordList
+            #print map((lambda x: "%05d" % int(x)), recordList)
