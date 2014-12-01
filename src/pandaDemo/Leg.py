@@ -31,9 +31,9 @@ class Leg:
         self.q0 = q0
         self.L = L
 
-        self.ankle_init_pos = self.ankle_ro.getPos(render)
-        self.ankle_pos_rot = PosRotEstimator(self.ankle_init_pos, self.ankle_ro.getHpr(render))
+        self.ankle_pos_rot = PosRotEstimator(self.ankle_ro.getPos(), self.ankle_ro.getHpr(render))
 
+        """
         # Debug visuals
         self.sphere = loader.loadModel("sphere.egg")
         self.sphere.setPos(self.ankle_ro.getPos(render))
@@ -55,6 +55,7 @@ class Leg:
         self.drawerNode.reparentTo(render)
 
         taskMgr.add(self.drawtask, "meshdrawer")
+        """
 
     def inv_kin(self, xy):
         """This is just a quick write up to find the inverse kinematics
@@ -120,8 +121,8 @@ class Leg:
         return task.cont
 
     def manuallyUpdateAnkle(self, pos, rot):
-        #self.ankle_wo.setPos(self.ankle_init_pos + pos)
-        print pos
+        self.ankle_wo.setPos(pos)
+        #print pos
         self.ankle_wo.setHpr(rot.getHpr() + (0, 0, -90))
 
     def updateAnkle(self, timestamp, gyro, accel, magnetic_field):

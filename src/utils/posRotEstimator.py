@@ -23,13 +23,15 @@ class PosRotEstimator():
             orientation = self.rotation.rotation
         # Rotate body accelerations to Earth orientation
         # TODO: Is this the best way of determining Earth orientation?
-        acc = orientation * LQuaternion(0, accel) * orientation.conjugate()
-        acc *= 9.81 # m/s/s
-        return Vec3(acc[1], acc[2], acc[3]) # z - 9.81
+        #acc = (orientation * LQuaternion(0, accel)) * orientation.conjugate()
+        #acc *= 9.81 # m/s/s
+        #return Vec3(acc[1], acc[2], acc[3]) # z - 9.81
+        return orientation.xform(accel) * 9.81
 
     def estimate(self, timestamp, gyro, accel, magnetic_field):
-        dt = timestamp - self.last_t
-        self.last_t = timestamp
+        #dt = timestamp - self.last_t
+        #self.last_t = timestamp
+        dt = 0.14
 
         gyro = Vec3(*gyro)
         accel = Vec3(*accel)
@@ -48,7 +50,8 @@ class PosRotEstimator():
 
         # If is stationary
         # TODO: Combine this with pressure sensor data
-        if accel_mag_filtered < 0.05:
+        # TODO: Why is accel_mag_filtered not working properly?
+        if accel.length() < 0.04:
             velocity = Vec3()
         else:
             velocity = self.last_vel + acc * dt
@@ -71,6 +74,7 @@ class PosRotEstimator():
         self.rotation.last_t = timestamps[0]
         # TODO: Rough estimate! :S
         dt = 1.0/256.0
+        timestamps = [i * dt for i in xrange(0, len(timestamps))]
 
         b, a = signal.butter(1, (2 * self.high_filter_cut_off) / (1/dt), 'high')
         w, h = signal.freqs(b, a, [accel.length() for accel in accels[1:]])
@@ -83,7 +87,8 @@ class PosRotEstimator():
         orientations = [self.rotation.rotationMagic(timestamp, gyro, accel, magnetic_field) for timestamp, gyro, accel, magnetic_field in izip(timestamps, gyros, accels, magnetic_fields)]
 
         accs = [self.fixAccelToEarth(accel, orientation) for accel, orientation in izip(accels, orientations)]
-        # FIXME: Why does using timestamps not work? Our dt is fairly consistent though so we could hard code it?
+        # FIXME: Why does using timestamps not work? Our dt is fairly consistent
+        # though so we could hard code it? (0.14)
         #dts = [t-last_t for last_t, t in izip(timestamps[:-1], timestamps[1:])]
         dts = [dt] * (len(timestamps) - 1)
 
