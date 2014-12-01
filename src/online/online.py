@@ -1,4 +1,5 @@
-import argparse, os, sys, re
+import argparse, os, sys, re, time
+import subprocess
 sys.path.append(os.path.abspath("../"))
 
 from utils.streamUtils.StreamRead import StreamRead
@@ -19,6 +20,7 @@ class main():
 
 	def __init__(self, args):
 		#confidence interval on classification
+		self.lastTime = 0
 		self.confidence_lim = 0.65
 		print "loading model..."
 		self.clf = joblib.load(args.model_file)
@@ -35,14 +37,13 @@ class main():
 			print self.classes
 		fft = args.fft
 		self.queue = []
-		data_dimensions = 9
+		data_dimensions = 6
 		#self.c = calibration.Calibration()
 		print "Initialising buffer, please wait"
-		self.stream = StreamRead(args.input_stream, exclude_indexes=[9])
+		self.stream = StreamRead(args.input_stream, exclude_indexes=[6,7,8,9])
 		while len(self.queue) < args.window_size:
 			records = self.stream.readFromStream()
 			for record in records:
-				print record
 				if len(record) == data_dimensions and '' not in record:
 					self.queue.append(record)
 
@@ -65,6 +66,7 @@ class main():
 				if confidence >= self.confidence_lim:
 					print prediction
 					print "confidence:", confidence
+					self.triggerEvents(prediction[0])
 				else:
 					print "Im not sure"
 
@@ -79,6 +81,20 @@ class main():
 		freqs = numpy.reshape(freqs, freqs.size)
 		freqs = freqs.real
 		return freqs
+
+	def triggerEvents(self,event):
+		if time.time() - self.lastTime > 1.0:
+			if event  == "LEFT-HEEL-TAP":
+				command = ["xdotool", "key", "XF86AudioPlay"]
+				subprocess.call(command)
+			elif event == "LEFT-FOOT-FLICKRIGHT":
+				command = ["xdotool", "key", "XF86AudioNext"]
+				subprocess.call(command)
+			elif event == "LEFT-FOOT-FLICKLEFT":
+				command = ["xdotool", "key", "XF86AudioPrev"]
+				subprocess.call(command)
+
+			self.lastTime = time.time()
 
 
 if __name__ == '__main__':
