@@ -119,8 +119,8 @@ def trainMultinomialHMM(data, classes, seq_lengths, dump_dir):
 	
 def main(args):
 	cv_folds = 10
-	data, classes, seq_lengths = SamplesFromDir(args.input_dir, exclude_classes=args.exclude)
-
+	data, classes, seq_lengths = SamplesFromDir(args.input_dir, exclude_classes=args.exclude, exclude_indexes=[6,7,8])
+	
 	if args.preprocess == 'freq':
 		data, classes = FequencyExtraction(data, classes, seq_lengths)
 
