@@ -1,7 +1,6 @@
 #Allows for relative import
 import sys, os, argparse, random, uuid, time
 import pygame
-from GIFImage import GIFImage
 sys.path.append(os.path.abspath("../"))
 
 from utils.streamUtils.StreamRead import StreamRead
@@ -24,7 +23,7 @@ class main():
 	 	speed = [2, 2]
 	 	black = 0, 0, 0
 	 	self.screen = pygame.display.set_mode(size)
-	 	pygame.display.set_caption('smartShoes Data capture')
+	 	pygame.display.set_caption('FootGest Data capture')
 	 	# Fill background
 		self.background = pygame.Surface(self.screen.get_size())
 		self.background = self.background.convert()
@@ -138,19 +137,13 @@ class main():
 	# Base capture method - Press space, do gesture and hold
 	def captureHold(self, dir_name, gesture, displayText):
 		self.textToScreen("Press SPACE, " + displayText + ", and hold for the next " + str(self.numSamples) + " seconds")
-		img = GIFImage("images/" + gesture + ".gif")
-		img.play()
-		img_size = img.get_size()
-		img_pos = (self.screen.get_size()[0]/2) - (img_size[0]/2), (self.screen.get_size()[1]/2) - (img_size[1]/2)
-		img.render(self.screen, img_pos)
-		pygame.display.flip()
+		mov = GestVid(gesture, self.screen)
 
 		ready = False
 
 		# Wait for user to begin test
 		while not ready:
-			img.render(self.screen, img_pos)
-			pygame.display.flip()
+			mov.update()
 			for event in pygame.event.get():
 				if event.type == pygame.KEYDOWN :
 					if event.key == pygame.K_SPACE :
@@ -182,12 +175,8 @@ class main():
 # Base capture method - Press space, do gesture, then press space
 	def captureExplicit(self, dir_name, gesture, displayText):
 		self.textToScreen("Press SPACE, " + displayText + ", and then press SPACE as soon as you are done")
-		img = GIFImage("images/" + gesture + ".gif")
-		img.play()
-		img_size = img.get_size()
-		img_pos = (self.screen.get_size()[0]/2) - (img_size[0]/2), (self.screen.get_size()[1]/2) - (img_size[1]/2)
-		img.render(self.screen, img_pos)
-		pygame.display.flip()
+
+		mov = GestVid(gesture, self.screen)
 
 		if not self.debug:
 			output_file = self.makeFile(dir_name, gesture)
@@ -198,8 +187,7 @@ class main():
 
 		# Wait for user to begin test
 		while not ready:
-			img.render(self.screen, img_pos)
-			pygame.display.flip()
+			mov.update()
 			for event in pygame.event.get():
 				if event.type == pygame.KEYDOWN :
 					if event.key == pygame.K_SPACE :
@@ -227,8 +215,41 @@ class main():
 					if event.key == pygame.K_SPACE and time.time() > startTime+0.3 :
 						done = True
 
+class GestVid:
+	def __init__(self, gesture, screen):
+		self.mov = pygame.movie.Movie("images/" + gesture + ".mpg")
+		if not self.mov.has_video():
+			print("Video file for " + gesture + " is invalid.")
+			sys.exit(1)
+		mov_size = self.mov.get_size()
+
+		self.background = pygame.Surface(mov_size)
+		self.background = self.background.convert()
+		self.background.fill((250, 250, 250))
+
+		self.screen = screen
+		self.pos = (self.screen.get_size()[0]/2) - (mov_size[0]/2), (self.screen.get_size()[1]/2) - (mov_size[1]/2)
+
+		self.mov_screen = pygame.Surface(mov_size).convert()
+		self.mov.set_display(self.mov_screen)
+		self.mov.play()
+
+	def update(self):
+		self.screen.blit(self.mov_screen, self.pos)
+		pygame.display.update()
+		if not self.mov.get_busy():
+			self.mov.rewind()
+			self.mov.set_display(None)
+			self.screen.blit(self.background, self.pos)
+			pygame.display.update()
+			time.sleep(0.5)
+			self.mov.set_display(self.mov_screen)
+			self.screen.blit(self.mov_screen, self.pos)
+			pygame.display.update()
+			self.mov.play()
+
 if __name__ == "__main__":
-	parser = argparse.ArgumentParser(description = "Capture traing data for smartshoes")
+	parser = argparse.ArgumentParser(description = "Capture traing data for the FootGest device")
 	parser.add_argument("-dir", action = "store", default = "/blahblah", dest = "DIR",  type = str, help = "The directory to store captured data in")
 	parser.add_argument("-d", action = "store_true", dest = "debug", help = "Turn debug mode on (run without hardware device)")
 	parser.add_argument("-n", action = "store", default = 5, type = int, dest = "num_trials", help = "The Number of times to capture data for each gesture")
