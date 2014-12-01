@@ -1,6 +1,8 @@
 import argparse
 import multiprocessing
 import os
+import csv
+import numpy
 
 from sklearn.linear_model import PassiveAggressiveClassifier
 from sklearn import svm
@@ -61,7 +63,7 @@ def testSVM(data, classes, n_folds, metric=''):
 
 #train passive agressive classifier on all data and dump model to file
 def trainSVM(data, classes, dump_dir):
-	clf = svm.SVC()
+	clf = svm.SVC(probability=True)
 	baseClassifierTrain(clf, "Support Vector Machine", data, classes, dump_dir)
 
 #perform crossfold validation on ada boost classifier
@@ -128,6 +130,13 @@ def main(args):
 		data = pca.transform(data)
 		if args.dump_dir != '':
 			joblib.dump(pca, os.path.join(args.dump_dir, "pca", "pca.pkl"))
+
+	if args.dump_dir != '':
+		classes_file = open(os.path.join(args.dump_dir, "classes.csv"), "w+")
+		wr = csv.writer(classes_file)
+		classOrder, y  = numpy.unique(classes, return_inverse=True)
+		wr.writerow(classOrder)
+
 
 
 	if args.dump_dir != '':
