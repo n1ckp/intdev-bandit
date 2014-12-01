@@ -120,7 +120,7 @@ class Leg:
         return task.cont
 
     def manuallyUpdateAnkle(self, pos, rot):
-        self.ankle_wo.setPos(self.ankle_init_pos + pos)
+        #self.ankle_wo.setPos(self.ankle_init_pos + pos)
         print pos
         self.ankle_wo.setHpr(rot.getHpr() + (0, 0, -90))
 

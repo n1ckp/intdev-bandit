@@ -37,14 +37,7 @@ def unpackFloat(hex):
 def unpackInt(hex):
     return struct.unpack("h", binascii.unhexlify(hex))[0]
 
-c = Calibration()
-
-value = getValue()
-if inputArgs.debug:
-    print value
-
-stream = StreamWrite(inputArgs.streamFile)
-while inputArgs.continuous:
+def getRawValues():
     value = getValue()
     timestamp = time.time()
     hexStr = "".join(value.split(" "))
@@ -57,6 +50,30 @@ while inputArgs.continuous:
     mx = unpackInt(hexStr[24:28])
     my = unpackInt(hexStr[28:32])
     mz = unpackInt(hexStr[32:36])
+    return (gx, gy, gz, ax, ay, az, mx, my, mz, timestamp)
+
+c = Calibration()
+
+value = getValue()
+if inputArgs.debug:
+    print value
+
+print "Calibrating"
+num_calib_samples = 32
+offsets  = [0] * 6
+for i in xrange(0, num_calib_samples):
+    values = getRawValues()
+    for j in xrange(0, 6):
+        offsets[j] += values[j]
+
+offsets = [offset / num_calib_samples for offset in offsets]
+c.gOffsets = offsets[:3]
+c.aOffsets = offsets[3:]
+print "Finished calibrating"
+
+stream = StreamWrite(inputArgs.streamFile)
+while inputArgs.continuous:
+    gx, gy, gz, ax, ay, az, mx, my, mz, timestamp = getRawValues()
 
     if not inputArgs.raw:
         gx, gy, gz, ax, ay, az, mx, my, mz = c.process(gx, gy, gz, ax, ay, az, mx, my, mz)

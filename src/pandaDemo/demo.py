@@ -32,6 +32,7 @@ class MayaDemo(ShowBase):
 
         self.bandit.reparentTo(render)
 
+        """
         r_hip_ro = self.bandit.exposeJoint(None, "modelRoot", self.R_LEG_JOINTS[0])
         r_hip_wo = self.bandit.controlJoint(None, "modelRoot", self.R_LEG_JOINTS[0])
         r_knee_ro = self.bandit.exposeJoint(None, "modelRoot", self.R_LEG_JOINTS[1])
@@ -40,14 +41,16 @@ class MayaDemo(ShowBase):
         r_ankle_wo = self.bandit.controlJoint(None, "modelRoot", self.R_LEG_JOINTS[2])
         distances = np.array([r_hip_ro.getDistance(r_knee_ro), r_knee_ro.getDistance(r_ankle_ro)])
         self.r_leg = Leg.Leg(r_hip_ro, r_hip_wo, r_knee_ro, r_knee_wo, r_ankle_ro, r_ankle_wo, distances)
+        """
 
-        """
-        l_hip = self.bandit.controlJoint(None, "modelRoot", self.L_LEG_JOINTS[0])
-        l_knee = self.bandit.controlJoint(None, "modelRoot", self.L_LEG_JOINTS[1])
-        l_ankle = self.bandit.exposeJoint(None, "modelRoot", self.L_LEG_JOINTS[2])
-        distances = np.array([l_hip.getDistance(l_knee), l_knee.getDistance(l_ankle)])
-        self.l_leg = Leg.Leg(l_hip, l_knee, l_ankle, distances)
-        """
+        l_hip_ro = self.bandit.exposeJoint(None, "modelRoot", self.L_LEG_JOINTS[0])
+        l_hip_wo = self.bandit.controlJoint(None, "modelRoot", self.L_LEG_JOINTS[0])
+        l_knee_ro = self.bandit.exposeJoint(None, "modelRoot", self.L_LEG_JOINTS[1])
+        l_knee_wo = self.bandit.controlJoint(None, "modelRoot", self.L_LEG_JOINTS[1])
+        l_ankle_ro = self.bandit.exposeJoint(None, "modelRoot", self.L_LEG_JOINTS[2])
+        l_ankle_wo = self.bandit.controlJoint(None, "modelRoot", self.L_LEG_JOINTS[2])
+        distances = np.array([l_hip_ro.getDistance(l_knee_ro), l_knee_ro.getDistance(l_ankle_ro)])
+        self.l_leg = Leg.Leg(l_hip_ro, l_hip_wo, l_knee_ro, l_knee_wo, l_ankle_ro, l_ankle_wo, distances)
 
         # Draws debug skeleton
         self.bandit.setBin('background', 1)
@@ -55,15 +58,16 @@ class MayaDemo(ShowBase):
 
         self.stream = StreamRead("/dev/input/smartshoes")
         self.last_t = time.time()
-        self.cap_file = open("capture.csv", "rw")
-        if False:
+        if True:
+            self.cap_file = open("capture.csv", "w")
             taskMgr.add(self.getDeviceData, 'Stream reader')
         else:
+            self.cap_file = open("capture.csv", "r")
             all_records = self.cap_file.readlines()
             all_records = [self.interpretRecordLine(line[:-1].split(',')) for line in all_records]
             all_records = zip(*all_records)
-            self.record_iter = self.r_leg.ankle_pos_rot.estimateMany(*all_records)
-            self.setNextTask(self.r_leg)
+            self.record_iter = self.l_leg.ankle_pos_rot.estimateMany(*all_records)
+            self.setNextTask(self.l_leg)
 
     @staticmethod
     def interpretRecordLine(records):
@@ -82,11 +86,11 @@ class MayaDemo(ShowBase):
         if records and len(records[0]) == 10:
             self.cap_file.write(','.join(records[0]) + "\n")
             records = self.interpretRecordLine(records[0])
-            self.r_leg.updateAnkle(*records)
+            self.l_leg.updateAnkle(*records)
         return task.again
 
     def useCapturedDeviceData(self, leg, pos, rot):
-        self.r_leg.manuallyUpdateAnkle(pos, rot)
+        self.l_leg.manuallyUpdateAnkle(pos, rot)
         self.setNextTask(leg)
 
     def setNextTask(self, leg):

@@ -25,7 +25,7 @@ class PosRotEstimator():
         # TODO: Is this the best way of determining Earth orientation?
         acc = orientation * LQuaternion(0, accel) * orientation.conjugate()
         acc *= 9.81 # m/s/s
-        return Vec3(acc[1], acc[2], acc[3] - 9.81)
+        return Vec3(acc[1], acc[2], acc[3]) # z - 9.81
 
     def estimate(self, timestamp, gyro, accel, magnetic_field):
         dt = timestamp - self.last_t
