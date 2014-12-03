@@ -20,8 +20,8 @@ class main():
 
 	def __init__(self, args):
 		#confidence interval on classification
-		self.lastTime = 0
-		self.confidence_lim = 0.65
+		self.lastTimes = {}
+		self.confidence_lim = 0.70
 		print "loading model..."
 		self.clf = joblib.load(args.model_file)
 		self.classes = []
@@ -35,6 +35,8 @@ class main():
 			line = re.sub('\s+','', line)
 			self.classes = line.split(',')
 			print self.classes
+		for cls in self.classes:
+			self.lastTimes[cls] = 0
 		fft = args.fft
 		self.queue = []
 		data_dimensions = 6
@@ -83,18 +85,28 @@ class main():
 		return freqs
 
 	def triggerEvents(self,event):
-		if time.time() - self.lastTime > 1.0:
-			if event  == "LEFT-HEEL-TAP":
-				command = ["xdotool", "key", "XF86AudioPlay"]
-				subprocess.call(command)
-			elif event == "LEFT-FOOT-FLICKRIGHT":
-				command = ["xdotool", "key", "XF86AudioNext"]
-				subprocess.call(command)
-			elif event == "LEFT-FOOT-FLICKLEFT":
-				command = ["xdotool", "key", "XF86AudioPrev"]
-				subprocess.call(command)
+		t = time.time() 
+		if event  == "LEFT-HEEL-TAP" and t - self.lastTimes["LEFT-HEEL-TAP"] > 1.0:
+			command = ["xdotool", "key", "XF86AudioPlay"]
+			subprocess.call(command)
+			self.lastTimes["LEFT-HEEL-TAP"] = time.time()
+		elif event == "LEFT-FOOT-FLICKRIGHT" and t - self.lastTimes["LEFT-FOOT-FLICKRIGHT"] > 1.0:
+			command = ["xdotool", "key", "XF86AudioNext"]
+			subprocess.call(command)
+			self.lastTimes["LEFT-FOOT-FLICKRIGHT"] = time.time()
+		elif event == "LEFT-FOOT-FLICKLEFT" and t - self.lastTimes["LEFT-FOOT-FLICKLEFT"] > 1.0:
+			command = ["xdotool", "key", "XF86AudioPrev"]
+			subprocess.call(command)
+			self.lastTimes["LEFT-FOOT-FLICKLEFT"] = time.time()
+		elif event == "LEFT-TOE-UP" and t - self.lastTimes["LEFT-TOE-UP"] > 0.25:
+			command = ["xdotool", "key", "XF86AudioRaiseVolume"]
+			subprocess.call(command)
+			self.lastTimes["LEFT-TOE-UP"] = time.time()
+		elif event == "LEFT-HEEL-RAISE" and t - self.lastTimes["LEFT-HEEL-RAISE"] > 0.25:
+			command = ["xdotool", "key", "XF86AudioLowerVolume"]
+			subprocess.call(command)
+			self.lastTimes["LEFT-HEEL-RAISE"] = time.time()
 
-			self.lastTime = time.time()
 
 
 if __name__ == '__main__':
