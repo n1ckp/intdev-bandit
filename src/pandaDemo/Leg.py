@@ -123,24 +123,28 @@ class Leg:
         return task.cont
 
     def manuallyUpdateAnkle(self, pos, rot):
+        min_angle = 5
+        max_angle = 30
+        speed = 60
+
+        def calc_vel(angle):
+            vel = (abs(angle) - min_angle) / (max_angle - min_angle)
+            if vel < 0:
+                vel = 0
+            elif angle < 0:
+                vel = -vel
+
+            return int(vel * speed)
+
         #self.ankle_wo.setPos(pos)
         #print pos
         self.ankle_wo.setHpr(rot.getHpr() + (0, 0, -90))
 
         roll, heading, pitch = rot.getHpr()
-        x = 0
-        y = 0
-        if heading < -10:
-            x = 5
-        elif heading > 10:
-            x = -5
-
-        if pitch < -10:
-            y = -5
-        elif pitch > 10:
-            y = 5
-
-        self.device.moveMouse(x, y)
+        x_vel = calc_vel(heading)
+        y_vel = calc_vel(pitch)
+        #print x_vel, y_vel
+        self.device.moveMouse(x_vel, y_vel)
 
     def updateAnkle(self, timestamp, gyro, accel, magnetic_field):
         pos, rot = self.ankle_pos_rot.estimate(timestamp, gyro, accel, magnetic_field)
