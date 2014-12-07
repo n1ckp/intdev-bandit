@@ -7,6 +7,8 @@
 /doc/report/*.out
 /doc/report/*.gz
 /doc/report/*.log
+/doc/report/*.bbl
+/doc/report/*.blg
 
 #Prelimiary Data
 preliminaryData/*
