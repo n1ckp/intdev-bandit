@@ -8,6 +8,7 @@ import scipy.optimize
 
 from panda3d.core import LQuaternion, MeshDrawer, OmniBoundingVolume, Vec3, Vec4
 from utils.rotationMagic import RotationCorrector
+from utils.posRotEstimator import PosRotEstimator
 
 class Leg:
     def __init__(self, hip_ro, hip_wo, knee_ro, knee_wo, ankle_ro, ankle_wo, L, q=[math.pi/4, math.pi/4], q0=np.array([math.pi/4, math.pi/4])):
@@ -30,9 +31,7 @@ class Leg:
         self.q0 = q0
         self.L = L
 
-        self.desired_ankle_pos = self.ankle_ro.getPos(render)
-
-        self.ankle_rotation = RotationCorrector(self.ankle_ro.getHpr())
+        self.ankle_pos_rot = PosRotEstimator(self.ankle_ro.getPos(), self.ankle_ro.getHpr(render))
 
         """
         # Debug visuals
@@ -111,19 +110,6 @@ class Leg:
             x0=self.q, eqcons=[x_constraint, y_constraint],
             args=(xy,), iprint=0)
 
-    def moveAnkle(self, translation):
-        """
-        pos = self.sphere.getPos()
-        pos += translation
-        self.sphere.setPos(pos)
-        """
-        self.desired_ankle_pos += translation
-        # Yay for consistant axis orientations...
-        self.q = self.inv_kin([self.desired_ankle_pos.x, self.desired_ankle_pos.z])
-
-        self.hip_wo.setR(90 + math.degrees(self.q[0]))
-        self.knee_wo.setR(180 - math.degrees(2*self.q[0]+self.q[1]))
-
     def drawtask(self, task):
         self.drawer.begin(base.cam, render)
         hippos = Vec3(self.hip_ro.getPos(render))
@@ -134,10 +120,11 @@ class Leg:
         self.drawer.end()
         return task.cont
 
-    def rotateAnkle(self, rotation):
-        rot = self.ankle_wo.getHpr()
-        self.ankle_rotation.setHpr(rot + rotation)
-        self.updateAnkleRotation()
+    def manuallyUpdateAnkle(self, pos, rot):
+        self.ankle_wo.setPos(pos)
+        #print pos
+        self.ankle_wo.setHpr(rot.getHpr() + (0, 0, -90))
 
-    def updateAnkleRotation(self):
-        self.ankle_wo.setHpr(self.ankle_rotation.getHpr() + (0, 0, -90))
+    def updateAnkle(self, timestamp, gyro, accel, magnetic_field):
+        pos, rot = self.ankle_pos_rot.estimate(timestamp, gyro, accel, magnetic_field)
+        self.manuallyUpdateAnkle(pos, rot)

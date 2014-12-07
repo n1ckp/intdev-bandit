@@ -58,3 +58,4 @@ class RotationCorrector():
             correction *= correction_strength
 
         self.rotate(self.rotation, angular_velocity + correction, dt)
+        return self.rotation
