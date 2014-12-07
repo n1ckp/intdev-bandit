@@ -79,11 +79,11 @@ class MayaDemo(ShowBase):
         acceleration[2], acceleration[0] = acceleration[0], acceleration[2]
         magnetic_field[2], magnetic_field[0] = magnetic_field[0], magnetic_field[2]
 
-        return (records[17], angular_velocity, acceleration, magnetic_field)
+        return (records[9], angular_velocity, acceleration, magnetic_field)
 
     def getDeviceData(self, task):
         records = self.stream.readFromStream()
-        if records and len(records[0]) == 18:
+        if records and len(records[0]) == 10:
             self.cap_file.write(','.join(records[0]) + "\n")
             records = self.interpretRecordLine(records[0])
             self.l_leg.updateAnkle(*records)

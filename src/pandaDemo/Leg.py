@@ -1,14 +1,15 @@
 # Adapted from https://github.com/studywolf/blog/tree/master/InvKin
 import sys
 sys.path.append("../")
+sys.path.append("../key_sim/")
 
 import math
 import numpy as np
 import scipy.optimize
 
 from panda3d.core import LQuaternion, MeshDrawer, OmniBoundingVolume, Vec3, Vec4
-from utils.rotationMagic import RotationCorrector
 from utils.posRotEstimator import PosRotEstimator
+from keySimDevice import keySimDevice
 
 class Leg:
     def __init__(self, hip_ro, hip_wo, knee_ro, knee_wo, ankle_ro, ankle_wo, L, q=[math.pi/4, math.pi/4], q0=np.array([math.pi/4, math.pi/4])):
@@ -32,6 +33,7 @@ class Leg:
         self.L = L
 
         self.ankle_pos_rot = PosRotEstimator(self.ankle_ro.getPos(), self.ankle_ro.getHpr(render))
+        self.device = keySimDevice()
 
         """
         # Debug visuals
@@ -124,6 +126,21 @@ class Leg:
         #self.ankle_wo.setPos(pos)
         #print pos
         self.ankle_wo.setHpr(rot.getHpr() + (0, 0, -90))
+
+        roll, heading, pitch = rot.getHpr()
+        x = 0
+        y = 0
+        if heading < -10:
+            x = 5
+        elif heading > 10:
+            x = -5
+
+        if pitch < -10:
+            y = -5
+        elif pitch > 10:
+            y = 5
+
+        self.device.moveMouse(x, y)
 
     def updateAnkle(self, timestamp, gyro, accel, magnetic_field):
         pos, rot = self.ankle_pos_rot.estimate(timestamp, gyro, accel, magnetic_field)

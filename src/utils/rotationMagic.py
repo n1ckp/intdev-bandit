@@ -46,6 +46,14 @@ class RotationCorrector():
         magnetic_field = Vec3(*magnetic_field)
         correction = (0, 0, 0)
 
+        if acceleration.length() < 0.1 and angular_velocity.length() < 0.05:
+            self.rotation = LQuaternion()
+        """
+        print "------"
+        print acceleration.length()
+        print angular_velocity.length()
+        """
+
         if abs(acceleration.length() - 1) <= 0.3:
             correction_strength = 1
             rotationCompass = self.rotationFromCompass(acceleration, magnetic_field)
