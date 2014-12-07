@@ -9,7 +9,7 @@ from receiver import calibration
 class main():
 	def __init__(self, inputArgs):
 		self.debug = inputArgs.debug
-		exclude_idxs = [9]
+		exclude_idxs = [17]
 		# Value to determine how long to wait for hold gestures, and how many
 		# samples to take for explicit gestures
 		self.numSamples = 5
@@ -43,33 +43,29 @@ class main():
 								"type" : "HOLD",
 								"desc" : "keep your feet at rest"},
 								{
-								"className" : "LEFT-FOOT-STOMP",
-								"type" : "EXPL",
-								"desc" : "stamp your left foot"},
-								{
-								"className" : "LEFT-TOE-UP",
+								"className" : "RIGHT-TOE-UP",
 								"type" : "HOLD",
-								"desc" : "raise your left toe while your heel is on the ground"},
+								"desc" : "raise your right toe while your Foot is in the air"},
 								{
-								"className" : "LEFT-TOE-TAP",
+								"className" : "RIGHT-TOE-TAP",
 								"type" : "EXPL",
-								"desc" : "tap your left toe once"},
+								"desc" : "tap your right toe once"},
 								{
-								"className" : "LEFT-HEEL-TAP",
+								"className" : "RIGHT-HEEL-TAP",
 								"type" : "EXPL",
-								"desc" : "tap your left heel once"},
+								"desc" : "tap your right heel once"},
 								{
-								"className" : "LEFT-HEEL-RAISE",
+								"className" : "RIGHT-TOE-DOWN",
 								"type" : "HOLD",
-								"desc" : "raise your left heel"},
+								"desc" : "Lower your right toe while your Foot is in the air"},
 								{
-								"className" : "LEFT-FOOT-FLICKLEFT",
+								"className" : "RIGHT-FOOT-SWIPELEFT",
 								"type" : "EXPL",
-								"desc" : "flick your left foot to the left"},
+								"desc" : "swipe your right foot to the left"},
 								{
-								"className" : "LEFT-FOOT-FLICKRIGHT",
+								"className" : "RIGHT-FOOT-SWIPERIGHT",
 								"type" : "EXPL",
-								"desc" : "flick your left foot to the right"},
+								"desc" : "swipe your right foot to the right"},
 								]
 
 		#generate trial orders
@@ -137,13 +133,13 @@ class main():
 	# Base capture method - Press space, do gesture and hold
 	def captureHold(self, dir_name, gesture, displayText):
 		self.textToScreen("Press SPACE, " + displayText + ", and hold for the next " + str(self.numSamples) + " seconds")
-		mov = GestVid(gesture, self.screen)
+		#mov = GestVid(gesture, self.screen)
 
 		ready = False
 
 		# Wait for user to begin test
 		while not ready:
-			mov.update()
+			#mov.update()
 			for event in pygame.event.get():
 				if event.type == pygame.KEYDOWN :
 					if event.key == pygame.K_SPACE :
@@ -171,12 +167,13 @@ class main():
 					#	self.writeData(output_file_calibrated, record)
 					#else:
 					#	self.writeData(output_file_calibrated, list(self.c.process(*[float(i) for i in record])))
+		#mov.stop()
 
 # Base capture method - Press space, do gesture, then press space
 	def captureExplicit(self, dir_name, gesture, displayText):
 		self.textToScreen("Press SPACE, " + displayText + ", and then press SPACE as soon as you are done")
 
-		mov = GestVid(gesture, self.screen)
+		#mov = GestVid(gesture, self.screen)
 
 		if not self.debug:
 			output_file = self.makeFile(dir_name, gesture)
@@ -187,7 +184,7 @@ class main():
 
 		# Wait for user to begin test
 		while not ready:
-			mov.update()
+			#mov.update()
 			for event in pygame.event.get():
 				if event.type == pygame.KEYDOWN :
 					if event.key == pygame.K_SPACE :
@@ -214,9 +211,11 @@ class main():
 					# Check that we've captured data for at least 0.3 seconds before quitting
 					if event.key == pygame.K_SPACE and time.time() > startTime+0.3 :
 						done = True
+		#mov.stop()
 
 class GestVid:
 	def __init__(self, gesture, screen):
+		gesture = gesture.replace("RIGHT", "LEFT")
 		self.mov = pygame.movie.Movie("images/" + gesture + ".mpg")
 		if not self.mov.has_video():
 			print("Video file for " + gesture + " is invalid.")
@@ -247,6 +246,10 @@ class GestVid:
 			self.screen.blit(self.mov_screen, self.pos)
 			pygame.display.update()
 			self.mov.play()
+
+	def stop(self):
+		self.mov.stop()
+		del self.mov
 
 if __name__ == "__main__":
 	parser = argparse.ArgumentParser(description = "Capture traing data for the FootGest device")

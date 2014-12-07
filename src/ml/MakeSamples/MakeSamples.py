@@ -5,7 +5,7 @@ import ntpath
 import numpy
 
 #geneerate sampels for directory of CSV files
-def SamplesFromDir(directory, sep='_', data_dimensions=9, exclude_classes = [], exclude_indexes=[]):
+def SamplesFromDir(directory, sep='_', data_dimensions=17, exclude_classes = [], exclude_indexes=[]):
 	data = []
 	classes =[]
 	seq_lengths = []
@@ -26,6 +26,7 @@ def SamplesFromDir(directory, sep='_', data_dimensions=9, exclude_classes = [], 
 				if len(sample) != data_dimensions or '' in sample:
 					break
 				data.append([sample[i] for i in range(0, len(sample)) if i not in  exclude_indexes])
+				print data[-1]
 				classes.append(class_name)
 				seq_length = seq_length + 1
 			if seq_length > 0:
