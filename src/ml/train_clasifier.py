@@ -1,5 +1,8 @@
 import argparse
 import multiprocessing
+import os
+import csv
+import numpy
 
 from sklearn.linear_model import PassiveAggressiveClassifier
 from sklearn import svm
@@ -24,10 +27,10 @@ def baseClassifierTest(clf, clf_name, data, classes, n_folds, metric=''):
 	scores = CrossValidation.cross_val_score(clf, data, classes, cv=n_folds, n_jobs=num_cores)
 	print clf_name , ", Accuracy: %0.2f (+/- %0.2f)" % (scores.mean(), scores.std() * 2)
 
-def baseClassifierTrain(clf, clf_name, data, classes, dump_file):
+def baseClassifierTrain(clf, clf_name, data, classes, dump_dir):
 	print "Training: ", clf_name
 	clf.fit(data, classes)
-	joblib.dump(clf, dump_file)
+	joblib.dump(clf, os.path.join(dump_dir, "model", "clf.pkl"))
 
 def baseSeqClassifierTest(clf, clf_name, data, classes, seq_lengths, n_folds, metric=''):
 	print "Testing: ", clf_name
@@ -35,10 +38,10 @@ def baseSeqClassifierTest(clf, clf_name, data, classes, seq_lengths, n_folds, me
 	scores = CrossValidation.seq_cross_val_score(clf, data, classes, seq_lengths, cv=n_folds, n_jobs=num_cores)
 	print clf_name, ", Accuracy: %0.2f (+/- %0.2f)" % (scores.mean(), scores.std() * 2)
 
-def baseSeqClassifierTrain(clf, clf_name, data, classes, seq_lengths, dump_file):
+def baseSeqClassifierTrain(clf, clf_name, data, classes, seq_lengths, dump_dir):
 	print "Training: ", clf_name
 	clf.fit(data, classes, seq_lengths)
-	joblib.dump(clf, dump_file)
+	joblib.dump(clf, os.path.join(dump_dir, "model", "clf.pkl"))
 
 
 #perform crossfold validation on passive agressive calssifier
@@ -48,9 +51,9 @@ def testPassiveAgressive(data, classes, n_folds, metric=''):
 
 
 #train passive agressive classifier on all data and dump model to file
-def trainPassiveAgressive(data, classes, dump_file):
+def trainPassiveAgressive(data, classes, dump_dir):
 	clf = PassiveAggressiveClassifier(loss='squared_hinge', C=1.0)
-	baseClassifierTrain(clf, "Passive Aggressive Classifier", data, classes, dump_file)
+	baseClassifierTrain(clf, "Passive Aggressive Classifier", data, classes, dump_dir)
 
 
 #perform crossfold validation on passive agressive calssifier
@@ -59,9 +62,9 @@ def testSVM(data, classes, n_folds, metric=''):
 	baseClassifierTest(clf, "Support Vector Machine", data, classes, n_folds, metric)
 
 #train passive agressive classifier on all data and dump model to file
-def trainSVM(data, classes, dump_file):
-	clf = svm.SVC()
-	baseClassifierTrain(clf, "Support Vector Machine", data, classes, dump_file)
+def trainSVM(data, classes, dump_dir):
+	clf = svm.SVC(probability=True)
+	baseClassifierTrain(clf, "Support Vector Machine", data, classes, dump_dir)
 
 #perform crossfold validation on ada boost classifier
 def testAdaBoost(data, classes, n_folds, metric=''):
@@ -69,9 +72,9 @@ def testAdaBoost(data, classes, n_folds, metric=''):
 	baseClassifierTest(clf, "Ada Boost Classifier", data, classes, n_folds, metric)
 
 #train ada boost on all data and dump model to file
-def trainAdaBoost(data, classes, dump_file):
+def trainAdaBoost(data, classes, dump_dir):
 	clf = AdaBoostClassifier(n_estimators=100)
-	baseClassifierTrain(clf, "Ada Boost Classifier", data, classes, dump_file)
+	baseClassifierTrain(clf, "Ada Boost Classifier", data, classes, dump_dir)
 
 #perform crossfold validation on k nearest neighbor classifier
 def testKNN(data, classes, n_folds, metric=''):
@@ -79,9 +82,9 @@ def testKNN(data, classes, n_folds, metric=''):
 	baseClassifierTest(clf, "K Nearest Neighbor", data, classes, n_folds, metric)
 
 #train k nearest neighbor on all data and dump model to file
-def trainKNN(data, classes, dump_file):
+def trainKNN(data, classes, dump_dir):
 	clf = KNeighborsClassifier()
-	baseClassifierTrain(clf, "K Nearest Neighbor", data, classes, dump_file)
+	baseClassifierTrain(clf, "K Nearest Neighbor", data, classes, dump_dir)
 
 #perform crossfold validation on Multinomial NB calssifier
 def testMultinomialNaiveBayes(data, classes, n_folds, metric=''):
@@ -89,18 +92,18 @@ def testMultinomialNaiveBayes(data, classes, n_folds, metric=''):
 	baseClassifierTest(clf, "Multinomial Naive Bayes", data, classes, n_folds, metric)
 
 #train Multinomial NBclassifier on all data and dump model to file
-def trainMultinomialNaiveBayes(data, classes, dump_file):
+def trainMultinomialNaiveBayes(data, classes, dump_dir):
 	clf = MultinomialNB(alpha=1.0)
-	baseClassifierTrain(clf, "Multinomial Naive Bayes", data, classes, dump_file)
+	baseClassifierTrain(clf, "Multinomial Naive Bayes", data, classes, dump_dir)
 
 def testStructuredPerceptron(data, classes, seq_lengths, n_folds, metric=''):
 	clf = StructuredPerceptron(max_iter=10)
 	baseSeqClassifierTest(clf, "Structured Perceptron", data, classes, seq_lengths, n_folds, metric)
 
 #train structured classifier on all data and dump model to file
-def trainStructuredPerceptron(data, classes, seq_lengths, dump_file):
+def trainStructuredPerceptron(data, classes, seq_lengths, dump_dir):
 	clf = StructuredPerceptron(max_iter=10)
-	baseSeqClassifierTrain(clf, "Structured Perceptron", data, classes, seq_lengths, dump_file)
+	baseSeqClassifierTrain(clf, "Structured Perceptron", data, classes, seq_lengths, dump_dir)
 
 
 def testMultinomialHMM(data, classes, seq_lengths, n_folds, metric=''):
@@ -109,15 +112,15 @@ def testMultinomialHMM(data, classes, seq_lengths, n_folds, metric=''):
 	
 
 #train multinomial HMM classifier on all data and dump model to file
-def trainMultinomialHMM(data, classes, seq_lengths, dump_file):
+def trainMultinomialHMM(data, classes, seq_lengths, dump_dir):
 	clf = MultinomialHMM(decode='viterbi', alpha=0.01)
-	baseSeqClassifierTrain(clf, "Multinomial Hidden Markov Model", data, classes, seq_lengths, dump_file)
+	baseSeqClassifierTrain(clf, "Multinomial Hidden Markov Model", data, classes, seq_lengths, dump_dir)
 	
 	
 def main(args):
 	cv_folds = 10
-	data, classes, seq_lengths = SamplesFromDir(args.input_dir, exclude_classes=args.exclude)
-
+	data, classes, seq_lengths = SamplesFromDir(args.input_dir, exclude_classes=args.exclude, exclude_indexes=[6,7,8])
+	
 	if args.preprocess == 'freq':
 		data, classes = FequencyExtraction(data, classes, seq_lengths)
 
@@ -125,22 +128,32 @@ def main(args):
 		pca = PCA(n_components=args.pca_comps)
 		pca.fit(data)
 		data = pca.transform(data)
+		if args.dump_dir != '':
+			joblib.dump(pca, os.path.join(args.dump_dir, "pca", "pca.pkl"))
 
-	if args.dump_file != '':
+	if args.dump_dir != '':
+		classes_file = open(os.path.join(args.dump_dir, "classes.csv"), "w+")
+		wr = csv.writer(classes_file)
+		classOrder, y  = numpy.unique(classes, return_inverse=True)
+		wr.writerow(classOrder)
+
+
+
+	if args.dump_dir != '':
 		if args.classifier == 'pa':
-			trainPassiveAgressive(data, classes, args.dump_file)
+			trainPassiveAgressive(data, classes, args.dump_dir)
 		elif args.classifier == 'sp':
-			trainStructuredPerceptron(data, classes, seq_lengths, args.dump_file)
+			trainStructuredPerceptron(data, classes, seq_lengths, args.dump_dir)
 		elif args.classifier == 'mhmm':
-			trainMultinomialHMM(data, classes, seq_lengths, args.dump_file)
+			trainMultinomialHMM(data, classes, seq_lengths, args.dump_dir)
 		elif args.classifier == 'mnb':
-			trainMultinomialNaiveBayes(data, classes, args.dump_file)
+			trainMultinomialNaiveBayes(data, classes, args.dump_dir)
 		elif args.classifier == 'svm':
-			trainSVM(data, classes, args.dump_file)
+			trainSVM(data, classes, args.dump_dir)
 		elif args.classifier == 'ada-boost':
-			trainAdaBoost(data, classes, args.dump_file)
+			trainAdaBoost(data, classes, args.dump_dir)
 		elif args.classifier == 'knn':
-			trainKNN(data, classes, args.dump_file)
+			trainKNN(data, classes, args.dump_dir)
 		else:
 			raise NameError("Unknown Classifer type")	
 	else:	
@@ -165,7 +178,7 @@ def main(args):
 if __name__ == "__main__":
 	parser = argparse.ArgumentParser(description='Train classifers on traing data')
 	parser.add_argument('input_dir', help="The directory containing training data files of the form <class>_<uuid>.csv")
-	parser.add_argument('--dump_file', default='', help="Dump the trained model to a file")
+	parser.add_argument('--dump_dir', default='', help="Dump the directory to dump the trained model to")
 	parser.add_argument('--classifier', default='pa', help="The directory containing taring data files of the form <class>_<uuid>.csv")
 	parser.add_argument('--pca', default=0, type=int, dest='pca_comps', help="The Number of components to extract with pca (default : 0<off>)")
 	parser.add_argument('--preprocess', default='', dest='preprocess', help="Apply preprocessing to data <freq>")

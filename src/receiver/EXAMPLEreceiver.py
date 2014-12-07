@@ -12,7 +12,8 @@ parser.add_argument("-U", action = "store", default = None, type = int, dest = "
 parser.add_argument("-H", action = "store", default = None, type = int, dest = "handle", help = "Characteristic Handle to read from (RFduino: 0x000e)")
 parser.add_argument("-C", action = "store_true", default = False, dest = "continuous", help = "Continuous read mode")
 parser.add_argument("-R", action = "store_true", default = False, dest = "raw", help = "Raw (Uncalibrated) Sensor data output")
-parser.add_argument("-LPF" action = "store_true", default = False, dest = "lpf", help = "Pass sensor values through a FIR Low Pass Filter")
+parser.add_argument("-LPF", action = "store_true", default = False, dest = "lpf", help = "Pass sensor values through a FIR Low Pass Filter")
+parser.add_argument("-L", action = "store_false", default = True, dest = "ldr", help = "Disable LDR sensors")
 parser.add_argument("-i", action = "store", default = "hci0", type = str, dest = "interface", help = "BLE interface (default: hci0)")
 inputArgs = parser.parse_args()
 
@@ -35,6 +36,10 @@ def unpackFloat(hex):
 def unpackInt(hex):
     return struct.unpack("h", binascii.unhexlify(hex))[0]
 
+def unpackOffBoard(hex):
+    val = ord(struct.unpack("c", binascii.unhexlify(hex))[0])
+    return [((val >> i) & 1) for i in xrange(0, 8)]
+
 c = Calibration()
 dsp = DSP(9)
 
@@ -55,6 +60,7 @@ while inputArgs.continuous:
     mx = unpackInt(hexStr[24:28])
     my = unpackInt(hexStr[28:32])
     mz = unpackInt(hexStr[32:36])
+    ldrs = unpackOffBoard(hexStr[36:38]) if inputArgs.ldr else ""
 
     if not inputArgs.raw:
         gx, gy, gz, ax, ay, az, mx, my, mz = c.process(gx, gy, gz, ax, ay, az, mx, my, mz)
@@ -64,4 +70,4 @@ while inputArgs.continuous:
 
     if inputArgs.debug:
         #print value
-        print "gx: " + str(gx) + " gy: " + str(gy) + " gz: " + str(gz) + " ax: " + str(ax) + " ay: " + str(ay) + " az: " + str(az) + " mx: " + str(mx) + " my: " + str(my) + " mz: " + str(mz)
+        print "gx: " + str(gx) + " gy: " + str(gy) + " gz: " + str(gz) + " ax: " + str(ax) + " ay: " + str(ay) + " az: " + str(az) + " mx: " + str(mx) + " my: " + str(my) + " mz: " + str(mz) + " ldrs: " + str(ldrs)
