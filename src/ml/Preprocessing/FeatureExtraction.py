@@ -2,7 +2,7 @@ import numpy
 
 #Apply fft to data sequence to transfrom from time domain to the freqency domain
 #n_freqs is the number of freqencies to extract
-def FequencyExtraction(data, classes, seq_lengths, n_freqs=24):
+def FequencyExtraction(data, classes, seq_lengths, n_freqs=6):
 	data_out = []
 	classes_out = []
 	i = 0

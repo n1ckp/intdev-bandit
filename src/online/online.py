@@ -22,13 +22,13 @@ class main():
 		#confidence interval on classification
 		self.lastTimes = {}
 		self.confidence_limits = {
-			"REST" : 0.70,
-			"RIGHT-HEEL-TAP" : 0.75,
-			"RIGHT-TOE-TAP" : 0.75,
+			"REST" : 0.80,
+			"RIGHT-HEEL-TAP" : 0.89,
+			"RIGHT-TOE-TAP" : 0.70,
 			"RIGHT-TOE-UP": 0.55,
 			"RIGHT-TOE-DOWN" : 0.55,
-			"RIGHT-FOOT-SWIPERIGHT" : 0.50,
-			"RIGHT-FOOT-SWIPELEFT" : 0.50
+			"RIGHT-FOOT-SWIPERIGHT" : 0.75,
+			"RIGHT-FOOT-SWIPELEFT" : 0.75
 		}
 		print "loading model..."
 		self.clf = joblib.load(args.model_file)
@@ -67,7 +67,7 @@ class main():
 				self.queue.pop(0)
 				data = numpy.array(data).astype(float)
 				if fft: 
-					data = self.featureExtract(data, 24)
+					data = self.featureExtract(data, 6)
 				if pca:
 					data = self.pca.transform(data)
 				
@@ -105,10 +105,12 @@ class main():
 			command = ["xdotool", "key", "XF86AudioNext"]
 			subprocess.call(command)
 			self.lastTimes["RIGHT-FOOT-SWIPERIGHT"] = time.time()
+			self.lastTimes["RIGHT-FOOT-SWIPERLEFT"] = time.time()
 		elif event == "RIGHT-FOOT-SWIPELEFT" and t - self.lastTimes["RIGHT-FOOT-SWIPELEFT"] > 1.0:
 			command = ["xdotool", "key", "XF86AudioPrev"]
 			subprocess.call(command)
 			self.lastTimes["RIGHT-FOOT-SWIPELEFT"] = time.time()
+			self.lastTimes["RIGHT-FOOT-SWIPERIGHT"] = time.time()
 		elif event == "RIGHT-TOE-UP" and t - self.lastTimes["RIGHT-TOE-UP"] > 0.25:
 			command = ["xdotool", "key", "XF86AudioRaiseVolume"]
 			subprocess.call(command)
@@ -129,7 +131,7 @@ if __name__ == '__main__':
 	parser.add_argument("model_file", action = "store", default = '', type=str, help = "The model file to load")
 	parser.add_argument("-pca", action = "store", default = "", type = str, dest = "pca_file", help = "A serialised pca object to load")
 	parser.add_argument("-cls", action = "store", default = "", type = str, dest = "classes_file", help = "A file containg the class ordering for the classifer")
-	parser.add_argument("-ws", action = "store", default = 7, type = int, dest = "window_size", help = "The size of the input window (default: 5)")
+	parser.add_argument("-ws", action = "store", default = 9, type = int, dest = "window_size", help = "The size of the input window (default: 5)")
 	parser.add_argument("-S", action = "store", default = "/dev/input/smartshoes", type = str, dest = "input_stream", help = "The input stream to read from (deafult: /dev/input/smartshoes")
 	parser.add_argument("-FFT", action = "store_true", default = False, dest = "fft", help = "Perform fft feature extraction on input")
 	
