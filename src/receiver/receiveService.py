@@ -65,7 +65,7 @@ while inputArgs.continuous:
     mx = unpackInt(hexStr[24:28])
     my = unpackInt(hexStr[28:32])
     mz = unpackInt(hexStr[32:36])
-    ldrs = unpackOffBoard(hexStr[36:38]) if inputArgs.ldr else ""
+    ldrs = unpackOffBoard(hexStr[36:38]) if inputArgs.ldr else []
 
     if not inputArgs.raw:
         gx, gy, gz, ax, ay, az, mx, my, mz = c.process(gx, gy, gz, ax, ay, az, mx, my, mz)

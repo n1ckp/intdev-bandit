@@ -23,7 +23,7 @@ class main():
 		self.lastTimes = {}
 		self.confidence_limits = {
 			"REST" : 0.80,
-			"RIGHT-HEEL-TAP" : 0.90,
+			"RIGHT-HEEL-TAP" : 0.92,
 			"RIGHT-TOE-TAP" : 0.70,
 			"RIGHT-TOE-UP": 0.75,
 			"RIGHT-TOE-DOWN" : 0.75,
@@ -105,12 +105,12 @@ class main():
 			command = ["xdotool", "key", "XF86AudioNext"]
 			subprocess.call(command)
 			self.lastTimes["RIGHT-FOOT-SWIPERIGHT"] = time.time()
-			self.lastTimes["RIGHT-FOOT-SWIPERLEFT"] = time.time() + 0.5
+			self.lastTimes["RIGHT-FOOT-SWIPERLEFT"] = time.time() + 1.0
 		elif event == "RIGHT-FOOT-SWIPELEFT" and t - self.lastTimes["RIGHT-FOOT-SWIPELEFT"] > 1.0:
 			command = ["xdotool", "key", "XF86AudioPrev"]
 			subprocess.call(command)
 			self.lastTimes["RIGHT-FOOT-SWIPELEFT"] = time.time()
-			self.lastTimes["RIGHT-FOOT-SWIPERIGHT"] = time.time() + 0.5
+			self.lastTimes["RIGHT-FOOT-SWIPERIGHT"] = time.time() + 1.0
 		elif event == "RIGHT-TOE-UP" and t - self.lastTimes["RIGHT-TOE-UP"] > 0.25:
 			command = ["xdotool", "key", "XF86AudioRaiseVolume"]
 			subprocess.call(command)
