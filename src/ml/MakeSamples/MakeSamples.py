@@ -35,7 +35,7 @@ def SamplesFromDir(directory, sep='_', data_dimensions=17, exclude_classes = [],
 	classes  = numpy.array(classes)
 	seq_lengths = numpy.array(seq_lengths).astype(int)
 
-	data, classes, seq_lengths = resample(data, classes, seq_lengths, 50)
+	#data, classes, seq_lengths = resample(data, classes, seq_lengths, 5)
 
 	return numpy.array(data).astype(float), numpy.array(classes), numpy.array(seq_lengths).astype(int)
 
