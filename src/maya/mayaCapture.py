@@ -2,9 +2,11 @@
 import socket, time, json, random, argparse, re
 import sys, os
 sys.path.append(os.path.abspath("../"))
+sys.path.append(os.path.abspath("../key_sim/"))
 
 from utils.rotationMagic import RotationCorrector
 from utils.streamUtils.StreamRead import StreamRead
+from keySimDevice import keySimDevice
 
 def main(args):
     maya = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -18,6 +20,11 @@ def main(args):
     duration = 60
 
     stream = StreamRead("/dev/input/smartshoes")
+    device = keySimDevice()
+
+    min_angle = 5
+    max_angle = 30
+    speed = 60
 
     # DEBUGGING (RUN WITHOUT DEVICE)
     if args.debug:
@@ -41,8 +48,8 @@ def main(args):
             time.sleep(0.1)
         return
 
-    r_leg_rotation = RotationCorrector()
-    while time.time() < startTime + duration:
+    l_leg_rotation = RotationCorrector()
+    while True:
         records = stream.readFromStream()
         if records and len(records[0]) == 10:
             records = map(float, records[0])
@@ -54,11 +61,28 @@ def main(args):
             #acceleration[2], acceleration[0] = acceleration[0], acceleration[2]
             #magnetic_field[2], magnetic_field[0] = magnetic_field[0], magnetic_field[2]
 
-            r_leg_rotation.rotationMagic(records[9], angular_velocity, acceleration, magnetic_field)
+            rot = l_leg_rotation.rotationMagic(records[9], angular_velocity, acceleration, magnetic_field)
 
-            data["ANKLE_R"]["ry"], data["ANKLE_R"]["rx"], data["ANKLE_R"]["rz"] = r_leg_rotation.getHpr()
+            data["ANKLE_L"]["ry"], data["ANKLE_L"]["rx"], data["ANKLE_L"]["rz"] = l_leg_rotation.getHpr()
+            data["ANKLE_L"]["ry"], data["ANKLE_L"]["rx"], data["ANKLE_L"]["rz"] = -data["ANKLE_L"]["ry"], -data["ANKLE_L"]["rx"], -data["ANKLE_L"]["rz"]
             jsonData = re.sub(r"\"", "\'", json.dumps(data))
             maya.send(jsonData)
+
+            def calc_vel(angle):
+                vel = (abs(angle) - min_angle) / (max_angle - min_angle)
+                if vel < 0:
+                    vel = 0
+                elif angle < 0:
+                    vel = -vel
+
+                return int(vel * speed)
+
+            roll, heading, pitch = rot.getHpr()
+            x_vel = calc_vel(heading)
+            y_vel = calc_vel(pitch)
+            #print x_vel, y_vel
+            device.moveMouse(x_vel, y_vel)
+
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description = "Capture device data and display on Maya")
